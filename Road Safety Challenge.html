@@ -1,0 +1,4591 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Road Safety Challenge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Overpass:wght@400;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #e4e6e1;
+        --surface: #ffffff;
+        --surface-2: #f0f1ec;
+        --ink: #1c2025;
+        --ink-2: #555c64;
+        --line: #cdd1c9;
+        --blue: #1d4f91;
+        --green: #0c6b44;
+        --amber: #f2b705;
+        --ok: #1c9a55;
+        --bad: #d2423b;
+        --asphalt: #2b3036;
+        --shadow:
+          0 1px 2px rgba(20, 25, 30, 0.06),
+          0 14px 32px -18px rgba(20, 25, 30, 0.35);
+        --focus: #f2b705;
+        color-scheme: light;
+        box-sizing: border-box;
+        padding-top: env(safe-area-inset-top, 0px);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #1e2227;
+          --surface: #272c33;
+          --surface-2: #2f353d;
+          --ink: #eef0eb;
+          --ink-2: #a5acb4;
+          --line: #3a414a;
+          --shadow:
+            0 1px 2px rgba(0, 0, 0, 0.3), 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #1e2227;
+        --surface: #272c33;
+        --surface-2: #2f353d;
+        --ink: #eef0eb;
+        --ink-2: #a5acb4;
+        --line: #3a414a;
+        --shadow:
+          0 1px 2px rgba(0, 0, 0, 0.3), 0 18px 40px -20px rgba(0, 0, 0, 0.7);
+        color-scheme: dark;
+      }
+      html {
+        scroll-padding-top: env(safe-area-inset-top, 0px);
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: inherit;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family:
+          "Overpass",
+          system-ui,
+          -apple-system,
+          "Segoe UI",
+          Roboto,
+          sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+        -webkit-tap-highlight-color: transparent;
+      }
+      button {
+        font: inherit;
+        cursor: pointer;
+        color: inherit;
+      }
+      button:focus-visible {
+        outline: 3px solid var(--focus);
+        outline-offset: 2px;
+      }
+      h1,
+      h2 {
+        margin: 0;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+      }
+      p {
+        margin: 0;
+      }
+
+      /* ---------- Home ---------- */
+      .home {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: clamp(20px, 4vw, 48px) clamp(16px, 4vw, 40px) 40px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-weight: 700;
+        color: var(--ink-2);
+        font-size: 0.95rem;
+      }
+      .brand-mark {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+      }
+      .brand-mark svg {
+        width: 100%;
+        height: 100%;
+      }
+      .hero {
+        padding: clamp(18px, 4vw, 40px) 0 clamp(24px, 4vw, 40px);
+      }
+      .hero h1 {
+        margin-top: clamp(24px, 5vw, 56px);
+        font-size: clamp(2.7rem, 8.4vw, 6rem);
+        font-weight: 900;
+        letter-spacing: -0.035em;
+        line-height: 0.92;
+        white-space: nowrap;
+      }
+      .tagline {
+        margin-top: 18px;
+        font-size: clamp(1.25rem, 2.6vw, 1.7rem);
+        font-weight: 800;
+        letter-spacing: -0.01em;
+      }
+      .lede {
+        margin-top: 8px;
+        color: var(--ink-2);
+        font-size: clamp(1rem, 1.6vw, 1.15rem);
+        max-width: 52ch;
+      }
+
+      .roadway {
+        position: relative;
+        background: #2b3036;
+        border-radius: 26px;
+        padding: clamp(18px, 3.5vw, 44px);
+        overflow: hidden;
+        background-image: linear-gradient(#2b3036, #2b3036);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.04);
+      }
+      .roadway::before,
+      .roadway::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: #f2b705;
+        opacity: 0.9;
+      }
+      .roadway::before {
+        top: 12px;
+      }
+      .roadway::after {
+        bottom: 12px;
+      }
+      .lane-line {
+        position: absolute;
+        left: -40px;
+        right: -40px;
+        top: 50%;
+        height: 6px;
+        margin-top: -3px;
+        background: repeating-linear-gradient(
+          90deg,
+          #fff 0 46px,
+          transparent 46px 86px
+        );
+        opacity: 0.75;
+        animation: lane 1.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      }
+      @keyframes lane {
+        from {
+          transform: translateX(-260px);
+          opacity: 0;
+        }
+        to {
+          transform: none;
+          opacity: 0.75;
+        }
+      }
+      .signs {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: clamp(16px, 3vw, 36px);
+      }
+      .sign {
+        border-radius: 20px;
+        padding: 7px;
+        box-shadow: 0 22px 40px -22px rgba(0, 0, 0, 0.8);
+        animation: rise 0.7s 0.25s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+      }
+      .sign-green {
+        animation-delay: 0.38s;
+      }
+      @keyframes rise {
+        from {
+          transform: translateY(18px);
+          opacity: 0;
+        }
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+      .sign-blue {
+        background: var(--blue);
+      }
+      .sign-green {
+        background: var(--green);
+      }
+      .sign-face {
+        height: 100%;
+        border: 3px solid #fff;
+        border-radius: 15px;
+        padding: clamp(14px, 2vw, 22px);
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        color: #fff;
+      }
+      .illo {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 10px;
+      }
+      .sign-copy h2 {
+        font-size: clamp(1.45rem, 2.6vw, 2rem);
+        font-weight: 900;
+      }
+      .sign-copy p {
+        margin-top: 8px;
+        opacity: 0.9;
+        max-width: 42ch;
+      }
+      .sign-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .sign-meta span {
+        font-size: 0.85rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.14);
+      }
+      .sign-btn {
+        margin-top: auto;
+        align-self: flex-start;
+        background: #fff;
+        border: 0;
+        border-radius: 12px;
+        padding: 13px 22px;
+        font-weight: 800;
+        font-size: 1.02rem;
+        transition:
+          transform 0.15s,
+          box-shadow 0.15s;
+      }
+      .sign-blue .sign-btn {
+        color: var(--blue);
+      }
+      .sign-green .sign-btn {
+        color: var(--green);
+      }
+      .sign-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 18px -8px rgba(0, 0, 0, 0.6);
+      }
+      .sign-btn:active {
+        transform: translateY(0);
+      }
+      .home-foot {
+        margin-top: 22px;
+        color: var(--ink-2);
+        font-size: 0.95rem;
+      }
+      @media (max-width: 760px) {
+        .signs {
+          grid-template-columns: 1fr;
+        }
+        .lane-line {
+          display: none;
+        }
+        .sign-btn {
+          align-self: stretch;
+          text-align: center;
+        }
+      }
+
+      /* ---------- Game header ---------- */
+      .game-page {
+        min-height: 100%;
+      }
+      .game-header {
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 40;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--line);
+      }
+      .gh-inner {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: 10px clamp(12px, 3vw, 32px);
+        display: grid;
+        grid-template-columns: auto 1fr auto auto;
+        align-items: center;
+        gap: 12px 18px;
+      }
+      .btn-back {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .btn-back:hover {
+        border-color: var(--ink-2);
+      }
+      .gh-title {
+        font-weight: 800;
+        font-size: 1.05rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .gh-stats {
+        display: flex;
+        gap: 6px;
+      }
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 4px 12px 3px;
+        min-width: 84px;
+      }
+      .stat-label {
+        font-size: 0.72rem;
+        color: var(--ink-2);
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .stat-val {
+        font-weight: 900;
+        font-size: 1.12rem;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+        animation: pop 0.35s ease;
+      }
+      .stat.ok .stat-val {
+        color: var(--ok);
+      }
+      .stat.bad .stat-val {
+        color: var(--bad);
+      }
+      @keyframes pop {
+        0% {
+          transform: scale(1.35);
+        }
+        100% {
+          transform: none;
+        }
+      }
+      .gh-actions {
+        display: flex;
+        gap: 8px;
+      }
+      .btn-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 10px;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        font-weight: 900;
+        font-size: 1.05rem;
+      }
+      .btn-submit {
+        height: 42px;
+        padding: 0 22px;
+        border-radius: 10px;
+        border: 0;
+        background: var(--ink);
+        color: var(--bg);
+        font-weight: 800;
+      }
+      .btn-submit.ready {
+        background: var(--ok);
+        color: #fff;
+        animation: pulse 1.6s ease-in-out infinite;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(28, 154, 85, 0.55);
+        }
+        50% {
+          box-shadow: 0 0 0 9px rgba(28, 154, 85, 0);
+        }
+      }
+      @media (max-width: 860px) {
+        .gh-inner {
+          grid-template-columns: auto 1fr auto;
+        }
+        .gh-title {
+          display: none;
+        }
+        .gh-stats {
+          grid-column: 1 / -1;
+          grid-row: 2;
+        }
+        .gh-stats .stat {
+          flex: 1;
+          min-width: 0;
+        }
+        .gh-actions {
+          grid-column: 3;
+        }
+      }
+      @media (max-width: 400px) {
+        .stat {
+          padding: 4px 8px 3px;
+        }
+        .stat-label {
+          font-size: 0.66rem;
+        }
+        .btn-back {
+          padding: 8px 10px;
+        }
+      }
+
+      /* ---------- Game body ---------- */
+      .game-body {
+        max-width: 1160px;
+        margin: 0 auto;
+        padding: clamp(16px, 3vw, 28px) clamp(12px, 3vw, 32px) 40px;
+      }
+      .game-intro {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        gap: 16px 28px;
+        flex-wrap: wrap;
+        margin-bottom: 18px;
+      }
+      .game-intro h1 {
+        font-size: clamp(1.8rem, 4vw, 2.7rem);
+        font-weight: 900;
+      }
+      .lead {
+        margin-top: 8px;
+        font-size: 1.05rem;
+        max-width: 60ch;
+      }
+      .points-note {
+        margin-top: 8px;
+        color: var(--ink-2);
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .pts {
+        display: inline-block;
+        background: color-mix(in srgb, var(--ok) 16%, transparent);
+        color: var(--ok);
+        font-weight: 900;
+        border-radius: 7px;
+        padding: 1px 8px;
+      }
+      .legend {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        max-width: 560px;
+      }
+      .legend li {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 4px 12px 4px 6px;
+        font-size: 0.84rem;
+        color: var(--ink-2);
+      }
+      .legend strong {
+        color: var(--ink);
+        font-weight: 700;
+      }
+      .legend-dot {
+        width: 18px;
+        height: 18px;
+        border-radius: 6px;
+        flex: none;
+      }
+      .k-car {
+        background: #7d8792;
+      }
+      .k-ev {
+        background: #13a08a;
+      }
+      .k-accessible {
+        background: #1d4fd8;
+      }
+      .k-moto {
+        background: #ee7a1c;
+      }
+      .k-van {
+        background: #f1c233;
+      }
+
+      .board-wrap {
+        width: 100%;
+      }
+      .board {
+        position: relative;
+        width: 100%;
+        border-radius: 18px;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        background: #454b53;
+        touch-action: pan-y;
+      }
+      .board-inner {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform-origin: 0 0;
+      }
+      .scene {
+        position: absolute;
+        inset: 0;
+        display: block;
+      }
+      .board-foot {
+        margin-top: 12px;
+        color: var(--ink-2);
+        font-size: 0.92rem;
+      }
+
+      .veh {
+        position: absolute;
+        left: 0;
+        top: 0;
+        transform-origin: 50% 50%;
+        transition:
+          transform 0.42s cubic-bezier(0.25, 0.8, 0.3, 1.1),
+          filter 0.2s;
+        filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        z-index: 5;
+      }
+      .veh svg {
+        display: block;
+        pointer-events: none;
+      }
+      .veh.movable {
+        cursor: grab;
+      }
+      .veh.done {
+        cursor: default;
+        z-index: 3;
+      }
+      .veh.lifted {
+        transition: filter 0.2s;
+        cursor: grabbing;
+        z-index: 30;
+        filter: drop-shadow(0 16px 14px rgba(0, 0, 0, 0.45))
+          drop-shadow(0 0 10px rgba(242, 183, 5, 0.55));
+      }
+      .veh.flash-ok {
+        filter: drop-shadow(0 0 14px rgba(40, 220, 120, 0.95))
+          drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
+      }
+      .veh.flash-bad {
+        filter: drop-shadow(0 0 14px rgba(255, 70, 60, 0.95))
+          drop-shadow(0 3px 2px rgba(0, 0, 0, 0.35));
+      }
+      .board-inner.dragging .veh:not(.lifted) {
+        pointer-events: none;
+      }
+      .slot-hint {
+        position: absolute;
+        border-radius: 6px;
+        border: 3px dashed rgba(70, 230, 140, 0.95);
+        background: rgba(40, 200, 110, 0.16);
+        animation: hint 1s ease-in-out infinite alternate;
+        pointer-events: none;
+        z-index: 2;
+      }
+      .slot-hint.over-ok {
+        border-style: solid;
+        background: rgba(40, 200, 110, 0.38);
+        animation: none;
+      }
+      .slot-hint.over-bad {
+        border: 3px solid rgba(255, 90, 80, 0.95);
+        background: rgba(255, 70, 60, 0.3);
+        animation: none;
+      }
+      @keyframes hint {
+        from {
+          opacity: 0.55;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      .check {
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        margin: -13px 0 0 -13px;
+        border-radius: 50%;
+        background: #1c9a55;
+        color: #fff;
+        font-weight: 900;
+        display: grid;
+        place-items: center;
+        font-size: 15px;
+        box-shadow:
+          0 0 0 3px #fff,
+          0 4px 10px rgba(0, 0, 0, 0.35);
+        z-index: 6;
+        animation: checkIn 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+        pointer-events: none;
+      }
+      @keyframes checkIn {
+        from {
+          transform: scale(0);
+        }
+        to {
+          transform: none;
+        }
+      }
+      .why-chip {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        background: rgba(190, 40, 35, 0.94);
+        color: #fff;
+        font-size: 12.5px;
+        font-weight: 700;
+        white-space: nowrap;
+        padding: 3px 9px 2px;
+        border-radius: 999px;
+        pointer-events: none;
+        z-index: 8;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.3);
+      }
+      .warn-dot {
+        position: absolute;
+        width: 26px;
+        height: 26px;
+        margin: -13px 0 0 -13px;
+        border-radius: 50%;
+        background: #d2423b;
+        color: #fff;
+        font-weight: 900;
+        font-size: 16px;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 0 0 3px #fff;
+        z-index: 8;
+        pointer-events: none;
+        animation: blink 1.6s ease-in-out infinite;
+      }
+      @keyframes blink {
+        50% {
+          transform: scale(0.82);
+        }
+      }
+      .board-inner.dragging .why-chip,
+      .board-inner.dragging .warn-dot {
+        opacity: 0.35;
+      }
+      .float {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        font-weight: 900;
+        font-size: 26px;
+        white-space: nowrap;
+        pointer-events: none;
+        z-index: 40;
+        padding: 4px 14px 2px;
+        border-radius: 12px;
+        animation: floatUp 1.1s ease-out forwards;
+      }
+      .float.ok {
+        background: #1c9a55;
+        color: #fff;
+      }
+      .float.bad {
+        background: #d2423b;
+        color: #fff;
+      }
+      @keyframes floatUp {
+        0% {
+          opacity: 0;
+          transform: translate(-50%, -30%) scale(0.7);
+        }
+        15% {
+          opacity: 1;
+          transform: translate(-50%, -50%) scale(1.05);
+        }
+        70% {
+          opacity: 1;
+        }
+        100% {
+          opacity: 0;
+          transform: translate(-50%, -150%);
+        }
+      }
+
+      /* ---------- Sorting ---------- */
+      .sort-board {
+        background: #cfd3c9;
+      }
+      .sort-ground {
+        position: absolute;
+        inset: 0;
+        background:
+          radial-gradient(
+            ellipse at 50% 55%,
+            rgba(255, 255, 255, 0.35),
+            transparent 60%
+          ),
+          repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.035) 0 2px,
+            transparent 2px 28px
+          ),
+          repeating-linear-gradient(
+            90deg,
+            rgba(0, 0, 0, 0.035) 0 2px,
+            transparent 2px 28px
+          ),
+          #d5d8cf;
+      }
+      .challenge {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 6px 12px;
+      }
+      .challenge-k {
+        font-weight: 700;
+        color: var(--ink-2);
+      }
+      .challenge-t {
+        font-weight: 900;
+        font-size: clamp(1.25rem, 2.4vw, 1.6rem);
+        letter-spacing: -0.01em;
+        border-bottom: 4px solid var(--topic);
+        line-height: 1.15;
+        animation: pop 0.45s ease;
+      }
+      .btn-secondary.small {
+        padding: 9px 16px;
+        font-size: 0.92rem;
+      }
+      .pail {
+        position: absolute;
+        z-index: 4;
+        transition: transform 0.2s;
+        pointer-events: none;
+      }
+      .pail-svg {
+        position: absolute;
+        left: 0;
+        top: 0;
+        overflow: visible;
+      }
+      .pail.over {
+        transform: scale(1.07);
+      }
+      .pail.over::after {
+        content: "";
+        position: absolute;
+        inset: -14px -14px 10px;
+        border-radius: 30px;
+        border: 4px dashed rgba(28, 154, 85, 0.9);
+        animation: hint 0.7s ease-in-out infinite alternate;
+      }
+      .pail.gulp {
+        animation: gulp 0.5s ease;
+      }
+      .pail.shake {
+        animation: shake 0.45s ease;
+      }
+      @keyframes gulp {
+        30% {
+          transform: scale(1.1, 0.94);
+        }
+        60% {
+          transform: scale(0.97, 1.04);
+        }
+      }
+      @keyframes shake {
+        20%,
+        60% {
+          transform: translateX(-9px) rotate(-2deg);
+        }
+        40%,
+        80% {
+          transform: translateX(9px) rotate(2deg);
+        }
+      }
+      .pile {
+        position: absolute;
+        left: 0;
+        height: 34px;
+      }
+      .pile span {
+        position: absolute;
+        top: 0;
+        font-size: 30px;
+        line-height: 1;
+        font-family:
+          "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+      }
+      .drop-label {
+        position: absolute;
+        transform: translate(-50%, -50%);
+        background: #1c9a55;
+        color: #fff;
+        font-weight: 800;
+        font-size: 17px;
+        padding: 5px 14px 3px;
+        border-radius: 999px;
+        z-index: 6;
+        pointer-events: none;
+        white-space: nowrap;
+      }
+      .item {
+        position: absolute;
+        left: 0;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        background: #fff;
+        border-radius: 18px;
+        border: 2px solid #e3e5df;
+        box-shadow:
+          0 2px 0 #c4c8bf,
+          0 8px 16px -8px rgba(0, 0, 0, 0.35);
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        cursor: grab;
+        transition:
+          transform 0.42s cubic-bezier(0.25, 0.8, 0.3, 1.1),
+          opacity 0.4s,
+          box-shadow 0.2s,
+          border-color 0.2s;
+        color: #1c2025;
+      }
+      .item-e {
+        line-height: 1;
+        font-family:
+          "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif;
+        pointer-events: none;
+      }
+      .item-n {
+        font-weight: 700;
+        line-height: 1.1;
+        text-align: center;
+        padding: 0 6px;
+        pointer-events: none;
+      }
+      .item.lifted {
+        transition: box-shadow 0.2s;
+        cursor: grabbing;
+        z-index: 30;
+        border-color: #f2b705;
+        box-shadow: 0 22px 28px -12px rgba(0, 0, 0, 0.5);
+      }
+      .item.in,
+      .item.falling {
+        pointer-events: none;
+        z-index: 3;
+      }
+      .item.falling {
+        transition:
+          transform 0.4s cubic-bezier(0.5, 0, 0.8, 0.4),
+          opacity 0.4s ease-in;
+      }
+      .item.rejected {
+        border-color: #d2423b;
+        animation: nope 0.5s ease;
+      }
+      @keyframes nope {
+        0%,
+        100% {
+          box-shadow: 0 0 0 0 rgba(210, 66, 59, 0.6);
+        }
+        40% {
+          box-shadow: 0 0 0 10px rgba(210, 66, 59, 0);
+        }
+      }
+      .board-inner.dragging .item:not(.lifted) {
+        pointer-events: none;
+      }
+
+      /* ---------- Toast ---------- */
+      .toast-wrap {
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: calc(env(safe-area-inset-top, 0px) + 92px);
+        display: flex;
+        justify-content: center;
+        z-index: 60;
+        pointer-events: none;
+        padding: 0 12px;
+      }
+      .toast {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: var(--surface);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-left-width: 6px;
+        border-radius: 14px;
+        padding: 10px 18px 9px 12px;
+        box-shadow: 0 18px 40px -16px rgba(0, 0, 0, 0.45);
+        animation:
+          toastIn 0.3s cubic-bezier(0.2, 0.8, 0.3, 1.2) both,
+          toastOut 0.3s 1.7s ease forwards;
+        max-width: 440px;
+      }
+      .toast.ok {
+        border-left-color: var(--ok);
+      }
+      .toast.bad {
+        border-left-color: var(--bad);
+      }
+      .toast.win {
+        border-left-color: var(--amber);
+      }
+      .toast-ico {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        color: #fff;
+        flex: none;
+      }
+      .toast.ok .toast-ico {
+        background: var(--ok);
+      }
+      .toast.bad .toast-ico {
+        background: var(--bad);
+      }
+      .toast.win .toast-ico {
+        background: var(--amber);
+        color: #1c2025;
+      }
+      .toast-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.3;
+      }
+      .toast-text span {
+        color: var(--ink-2);
+        font-size: 0.9rem;
+      }
+      @keyframes toastIn {
+        from {
+          transform: translateY(-14px);
+          opacity: 0;
+        }
+        to {
+          transform: none;
+          opacity: 1;
+        }
+      }
+      @keyframes toastOut {
+        to {
+          transform: translateY(-8px);
+          opacity: 0;
+        }
+      }
+      @media (max-width: 860px) {
+        .toast-wrap {
+          top: calc(env(safe-area-inset-top, 0px) + 124px);
+        }
+      }
+
+      /* ---------- Modals ---------- */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        background: rgba(15, 18, 22, 0.6);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px
+          calc(env(safe-area-inset-bottom, 0px) + 16px);
+        animation: fade 0.2s ease both;
+        overflow-y: auto;
+      }
+      @keyframes fade {
+        from {
+          opacity: 0;
+        }
+      }
+      .modal {
+        background: var(--surface);
+        color: var(--ink);
+        border-radius: 22px;
+        width: 100%;
+        max-width: 460px;
+        max-height: 100%;
+        overflow-y: auto;
+        padding: clamp(20px, 4vw, 30px);
+        box-shadow: 0 30px 70px -20px rgba(0, 0, 0, 0.6);
+        animation: modalIn 0.35s cubic-bezier(0.2, 0.8, 0.3, 1.15) both;
+        margin: auto;
+      }
+      @keyframes modalIn {
+        from {
+          transform: translateY(20px) scale(0.97);
+          opacity: 0;
+        }
+      }
+      .howto-kicker {
+        color: var(--ink-2);
+        font-weight: 700;
+        font-size: 0.95rem;
+      }
+      .howto h2 {
+        font-size: 1.9rem;
+        font-weight: 900;
+        margin-top: 2px;
+      }
+      .steps {
+        list-style: none;
+        margin: 18px 0 0;
+        padding: 0;
+        display: grid;
+        gap: 10px;
+      }
+      .steps li {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+      }
+      .step-n {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: var(--amber);
+        color: #1c2025;
+        display: grid;
+        place-items: center;
+        font-weight: 900;
+        flex: none;
+      }
+      .howto-legend {
+        margin-top: 18px;
+        background: var(--surface-2);
+        border-radius: 14px;
+        padding: 10px 14px;
+        display: grid;
+        gap: 7px;
+        font-size: 0.9rem;
+      }
+      .howto-legend div {
+        display: grid;
+        grid-template-columns: 18px auto 1fr;
+        gap: 9px;
+        align-items: center;
+      }
+      .howto-legend span:last-child {
+        color: var(--ink-2);
+        text-align: right;
+      }
+      .howto-note {
+        margin-top: 18px;
+        background: var(--surface-2);
+        border-radius: 14px;
+        padding: 12px 14px;
+        font-size: 0.95rem;
+      }
+      .btn-primary {
+        background: var(--ink);
+        color: var(--bg);
+        border: 0;
+        border-radius: 12px;
+        padding: 13px 22px;
+        font-weight: 800;
+        font-size: 1rem;
+      }
+      .btn-primary.wide {
+        width: 100%;
+        margin-top: 22px;
+      }
+      .btn-primary:hover {
+        filter: brightness(1.15);
+      }
+      .btn-secondary {
+        background: var(--surface);
+        color: var(--ink);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-weight: 800;
+        font-size: 1rem;
+      }
+      .btn-secondary:hover {
+        border-color: var(--ink-2);
+      }
+
+      .result {
+        text-align: center;
+      }
+      .result h2 {
+        font-size: clamp(1.4rem, 4vw, 1.75rem);
+        font-weight: 900;
+      }
+      .ring {
+        position: relative;
+        width: 170px;
+        height: 170px;
+        margin: 18px auto 6px;
+      }
+      .ring svg {
+        width: 100%;
+        height: 100%;
+      }
+      .ring-track {
+        fill: none;
+        stroke: var(--surface-2);
+        stroke-width: 12;
+      }
+      .ring-bar {
+        fill: none;
+        stroke-width: 12;
+        stroke-linecap: round;
+        transition: stroke-dashoffset 1s cubic-bezier(0.3, 0.7, 0.3, 1);
+      }
+      .ring.good .ring-bar {
+        stroke: var(--ok);
+      }
+      .ring.mid .ring-bar {
+        stroke: var(--amber);
+      }
+      .ring.low .ring-bar {
+        stroke: var(--bad);
+      }
+      .ring-center {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      .ring-label {
+        font-size: 0.8rem;
+        color: var(--ink-2);
+        font-weight: 700;
+      }
+      .ring-score {
+        font-size: 3rem;
+        font-weight: 900;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        margin-top: 4px;
+      }
+      .ring-max {
+        font-size: 0.95rem;
+        color: var(--ink-2);
+        font-weight: 700;
+      }
+      .result-lines {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      .rline {
+        background: var(--surface-2);
+        border-radius: 14px;
+        padding: 10px 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        font-weight: 700;
+        font-size: 0.9rem;
+        line-height: 1.25;
+      }
+      .rnum {
+        font-size: 1.7rem;
+        font-weight: 900;
+      }
+      .rline.ok .rnum {
+        color: var(--ok);
+      }
+      .rline.bad .rnum {
+        color: var(--bad);
+      }
+      .formula {
+        margin-top: 12px;
+        font-weight: 800;
+      }
+      .missed {
+        margin-top: 12px;
+        text-align: left;
+        background: color-mix(in srgb, var(--bad) 9%, var(--surface));
+        border-radius: 12px;
+        padding: 10px 12px;
+        font-size: 0.88rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .missed span {
+        color: var(--ink-2);
+      }
+      .result-msg {
+        margin-top: 14px;
+        color: var(--ink-2);
+        font-size: 1rem;
+      }
+      .result-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      @media (max-width: 380px) {
+        .result-actions {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .legend {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 5px;
+          max-width: none;
+          width: 100%;
+        }
+        .legend li {
+          font-size: 0.76rem;
+          padding: 4px 8px 4px 5px;
+          border-radius: 10px;
+          line-height: 1.2;
+        }
+        .legend li span:last-child {
+          display: flex;
+          flex-direction: column;
+        }
+        .legend-dot {
+          width: 14px;
+          height: 14px;
+          border-radius: 4px;
+        }
+        .points-note {
+          font-size: 0.92rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+    <script>
+      const { useState, useEffect, useRef, useMemo, useCallback } = React;
+      function shuffle(e) {
+        const t = e.slice();
+        for (let a = t.length - 1; a > 0; a--) {
+          const n = Math.floor(Math.random() * (a + 1));
+          [t[a], t[n]] = [t[n], t[a]];
+        }
+        return t;
+      }
+      const clamp = (e, t, a) => Math.max(t, Math.min(a, e)),
+        rand = (e, t) => e + Math.random() * (t - e),
+        VEHICLES = [
+          { id: "red", kind: "car", name: "Red sedan", color: "#D4483C" },
+          { id: "blue", kind: "car", name: "Blue sedan", color: "#2F62C9" },
+          {
+            id: "silver",
+            kind: "car",
+            name: "Silver hatchback",
+            color: "#C7CDD3",
+          },
+          { id: "ev", kind: "ev", name: "Electric car", color: "#13A08A" },
+          {
+            id: "acc",
+            kind: "accessible",
+            name: "Blue Badge car",
+            color: "#6A4FC6",
+          },
+          { id: "moto", kind: "moto", name: "Motorcycle", color: "#EE7A1C" },
+          { id: "van", kind: "van", name: "Delivery van", color: "#F1C233" },
+        ],
+        DIMS = {
+          car: [46, 88],
+          ev: [46, 88],
+          accessible: [46, 88],
+          moto: [26, 60],
+          van: [56, 110],
+        },
+        BAY_RULES = {
+          car: "Standard bays are for regular cars",
+          ev: "EV bays are reserved for electric cars",
+          accessible: "Accessible bays need a Blue Badge permit",
+          moto: "Motorcycle bays are for motorcycles only",
+          van: "Loading zones are for delivery vehicles",
+        },
+        OWN_BAY_HINT = {
+          ev: "Electric cars belong in the EV charging bay",
+          accessible: "Blue Badge holders use the accessible bay",
+          moto: "Motorcycles park in the motorcycle bay",
+          van: "Delivery vans use the loading zone",
+        },
+        LEGEND = [
+          { kind: "car", label: "Regular cars", bay: "P bays" },
+          { kind: "ev", label: "Electric car", bay: "EV charging bay" },
+          {
+            kind: "accessible",
+            label: "Blue Badge car",
+            bay: "Accessible bay",
+          },
+          { kind: "moto", label: "Motorcycle", bay: "Motorcycle bay" },
+          { kind: "van", label: "Delivery van", bay: "Loading zone" },
+        ],
+        PARK_LAYOUTS = {
+          wide: {
+            W: 1e3,
+            H: 640,
+            slots: [
+              {
+                id: "acc",
+                kind: "accessible",
+                x: 265,
+                y: 350,
+                w: 90,
+                h: 120,
+                rot: 0,
+              },
+              { id: "r1", kind: "car", x: 385, y: 350, w: 70, h: 120, rot: 0 },
+              { id: "r2", kind: "car", x: 455, y: 350, w: 70, h: 120, rot: 0 },
+              { id: "r3", kind: "car", x: 525, y: 350, w: 70, h: 120, rot: 0 },
+              { id: "ev", kind: "ev", x: 595, y: 350, w: 70, h: 120, rot: 0 },
+              {
+                id: "moto",
+                kind: "moto",
+                x: 290,
+                y: 566,
+                w: 60,
+                h: 96,
+                rot: 180,
+              },
+              {
+                id: "load",
+                kind: "van",
+                x: 650,
+                y: 570,
+                w: 100,
+                h: 124,
+                rot: 180,
+              },
+            ],
+            wrong: [
+              { x: 420, y: 86, r: 90, why: "Facing the wrong way" },
+              { x: 560, y: 186, r: 90, why: "Double parked in a live lane" },
+              { x: 885, y: 136, r: 0, why: "Blocking the pedestrian crossing" },
+              { x: 730, y: 256, r: 90, why: "Parked on the sidewalk" },
+              { x: 420, y: 350, r: 0, why: "Taking up two spaces" },
+              {
+                x: 330,
+                y: 360,
+                r: 0,
+                why: "Blocking the access aisle",
+                below: !0,
+              },
+              { x: 460, y: 570, r: 90, why: "Parked in the fire lane" },
+              { x: 790, y: 460, r: 120, why: "Angled across the aisle" },
+              { x: 110, y: 256, r: 0, why: "Blocking the driveway" },
+              { x: 940, y: 462, r: 195, why: "Outside a marked space" },
+              { x: 120, y: 420, r: 35, why: "Stopped in the driving aisle" },
+            ],
+          },
+          tall: {
+            W: 600,
+            H: 1e3,
+            slots: [
+              {
+                id: "acc",
+                kind: "accessible",
+                x: 530,
+                y: 75,
+                w: 120,
+                h: 90,
+                rot: 90,
+              },
+              { id: "r1", kind: "car", x: 530, y: 195, w: 120, h: 70, rot: 90 },
+              { id: "r2", kind: "car", x: 530, y: 265, w: 120, h: 70, rot: 90 },
+              { id: "r3", kind: "car", x: 530, y: 335, w: 120, h: 70, rot: 90 },
+              { id: "ev", kind: "ev", x: 530, y: 405, w: 120, h: 70, rot: 90 },
+              {
+                id: "load",
+                kind: "van",
+                x: 530,
+                y: 540,
+                w: 124,
+                h: 104,
+                rot: 90,
+              },
+              {
+                id: "moto",
+                kind: "moto",
+                x: 542,
+                y: 650,
+                w: 96,
+                h: 60,
+                rot: 90,
+              },
+            ],
+            wrong: [
+              { x: 84, y: 330, r: 0, why: "Facing the wrong way" },
+              { x: 184, y: 480, r: 0, why: "Double parked in a live lane" },
+              { x: 134, y: 86, r: 90, why: "Blocking the pedestrian crossing" },
+              { x: 253, y: 420, r: 0, why: "Parked on the sidewalk" },
+              { x: 530, y: 230, r: 90, why: "Taking up two spaces" },
+              { x: 530, y: 140, r: 90, why: "Blocking the access aisle" },
+              { x: 329, y: 710, r: 0, why: "Parked in the fire lane" },
+              { x: 425, y: 820, r: 25, why: "Angled across the aisle" },
+              { x: 253, y: 940, r: 0, why: "Blocking the driveway" },
+              { x: 329, y: 400, r: 160, why: "Outside a marked space" },
+              { x: 425, y: 330, r: 0, why: "Stopped in the driving aisle" },
+            ],
+          },
+        },
+        TOPICS = [
+          {
+            title: "Roadside Waste Cleanup",
+            bin: "Litter bin",
+            color: "#2E7D4F",
+            brief:
+              "Clear litter from the roadside verge. Anything useful or valuable stays out of the bin.",
+            good: [
+              ["\u{1F964}", "Paper cup"],
+              ["\u{1F96B}", "Empty can"],
+              ["\u{1F4F0}", "Old newspaper"],
+              ["\u{1F36C}", "Sweet wrapper"],
+              ["\u{1F4E6}", "Cardboard box"],
+              ["\u{1F9C3}", "Juice carton"],
+              ["\u{1F34C}", "Banana peel"],
+              ["\u{1F961}", "Takeaway box"],
+              ["\u{1F9FB}", "Used tissue"],
+              ["\u{1F37E}", "Empty bottle"],
+            ],
+            bad: [
+              ["\u{1F9BA}", "Hi-vis vest"],
+              ["\u{1F511}", "Car keys"],
+              ["\u26D1\uFE0F", "Safety helmet"],
+              ["\u{1F9EF}", "Fire extinguisher"],
+              ["\u{1F4F1}", "Mobile phone"],
+              ["\u{1F6A7}", "Road barrier"],
+            ],
+          },
+          {
+            title: "Emergency Roadside Kit",
+            bin: "Emergency kit",
+            color: "#C2392F",
+            brief:
+              "Pack what a driver needs if they break down at the side of the road.",
+            good: [
+              ["\u{1F526}", "Torch"],
+              ["\u{1FA79}", "First aid kit"],
+              ["\u{1F9BA}", "Reflective vest"],
+              ["\u26A0\uFE0F", "Warning triangle"],
+              ["\u{1F9EF}", "Fire extinguisher"],
+              ["\u{1F9E4}", "Gloves"],
+              ["\u{1F527}", "Wrench"],
+              ["\u{1F4A7}", "Drinking water"],
+              ["\u{1F50C}", "Jump leads"],
+              ["\u{1F50B}", "Power bank"],
+            ],
+            bad: [
+              ["\u{1F37A}", "Beer"],
+              ["\u{1F3AE}", "Game controller"],
+              ["\u{1F3C0}", "Basketball"],
+              ["\u{1F3B2}", "Dice"],
+              ["\u{1F388}", "Party balloon"],
+              ["\u{1F37F}", "Popcorn"],
+            ],
+          },
+          {
+            title: "Pick Correct Road Symbol",
+            bin: "Correct Signs",
+            color: "#D8660C",
+            brief: "Drag the real UK road signs into the box. Fake or invented symbols do not belong.",
+            good: [
+              ["svg:stop", "Stop"],
+              ["svg:giveway", "Give Way"],
+              ["svg:speed30", "Speed Limit 30"],
+              ["svg:noentry", "No Entry"],
+              ["svg:crossing", "Pedestrian Crossing"],
+              ["svg:roundabout", "Roundabout"],
+              ["svg:noovertake", "No Overtaking"],
+              ["svg:keepleft", "Keep Left"],
+              ["svg:yield", "Give Way Ahead"],
+              ["svg:national", "National Speed Limit"],
+            ],
+            bad: [
+              ["svg:fake1", "Wrong-color Stop"],
+              ["svg:fake2", "Upside-down Give Way"],
+              ["svg:fake3", "Green No Entry"],
+              ["svg:fake4", "Square Speed Sign"],
+              ["svg:fake5", "Pink Roundabout"],
+              ["svg:fake6", "Crossed Circle"],
+            ],
+          },
+          {
+            title: "Vehicle Safety Check",
+            bin: "Pre-drive checks",
+            color: "#2459A8",
+            brief:
+              "Collect the things a driver should check before setting off.",
+            good: [
+              ["\u{1F4A1}", "Headlights"],
+              ["\u{1F6E2}\uFE0F", "Engine oil"],
+              ["\u{1F50B}", "Battery"],
+              ["\u26FD", "Fuel level"],
+              ["\u{1F6A8}", "Hazard lights"],
+              ["\u{1F6D1}", "Brakes"],
+              ["\u{1F321}\uFE0F", "Coolant"],
+              ["\u{1F4BA}", "Seat position"],
+              ["\u{1F536}", "Indicators"],
+              ["\u{1F9FC}", "Washer fluid"],
+            ],
+            bad: [
+              ["\u{1F4F1}", "Social media"],
+              ["\u{1F354}", "Burger"],
+              ["\u{1F3AE}", "Video game"],
+              ["\u{1F37A}", "Beer"],
+              ["\u{1F3B5}", "Loud music"],
+              ["\u{1F3B2}", "Dice"],
+            ],
+          },
+          {
+            title: "Emergency Spill Cleanup",
+            bin: "Spill kit",
+            color: "#B88A00",
+            brief:
+              "Gather what a crew needs to clean up an oil spill on the road safely.",
+            good: [
+              ["\u{1F9F9}", "Broom"],
+              ["\u{1F9FD}", "Absorbent pad"],
+              ["\u{1F9E4}", "Chemical gloves"],
+              ["\u{1F6CD}\uFE0F", "Waste bags"],
+              ["\u{1F9FB}", "Absorbent roll"],
+              ["\u{1F9BA}", "Hi-vis vest"],
+              ["\u26A0\uFE0F", "Warning sign"],
+              ["\u{1F97D}", "Goggles"],
+              ["\u{1F9F4}", "Degreaser"],
+              ["\u{1F526}", "Torch"],
+            ],
+            bad: [
+              ["\u{1F382}", "Birthday cake"],
+              ["\u{1F3AE}", "Game console"],
+              ["\u{1F6F9}", "Skateboard"],
+              ["\u{1F37F}", "Popcorn"],
+              ["\u{1F4DA}", "Novel"],
+              ["\u{1F525}", "Open flame"],
+            ],
+          },
+        ],
+        SORT_LAYOUTS = {
+          wide: {
+            W: 1e3,
+            H: 600,
+            cols: 7,
+            rows: 4,
+            size: 96,
+            bx: 500,
+            by: 318,
+            bw: 230,
+            bh: 228,
+            ex: [280, 720, 150, 470],
+          },
+          tall: {
+            W: 600,
+            H: 900,
+            cols: 4,
+            rows: 6,
+            size: 118,
+            bx: 300,
+            by: 455,
+            bw: 204,
+            bh: 212,
+            ex: [150, 450, 300, 600],
+          },
+        };
+      function RoadSignSVG({ id }) {
+        const v = "0 0 64 64", s = 64;
+        // ── CORRECT SIGNS ──────────────────────────────────────────────────────
+        // stop: red octagon (8 equal sides), white border, white STOP text
+        if (id === "stop") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("polygon", { points: "20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20", fill: "#CC0000", stroke: "#fff", strokeWidth: "3.5" }),
+          React.createElement("polygon", { points: "21,7 43,7 57,21 57,43 43,57 21,57 7,43 7,21", fill: "none", stroke: "#fff", strokeWidth: "1.5" }),
+          React.createElement("text", { x: "32", y: "36", textAnchor: "middle", dominantBaseline: "middle", fontSize: "13", fontWeight: "900", fill: "#fff", fontFamily: "Arial,sans-serif", letterSpacing: "1" }, "STOP")
+        );
+        // giveway: white inverted triangle, red border, inner red inverted triangle outline
+        if (id === "giveway") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("polygon", { points: "32,60 2,8 62,8", fill: "#fff", stroke: "#CC0000", strokeWidth: "5", strokeLinejoin: "round" }),
+          React.createElement("polygon", { points: "32,52 10,16 54,16", fill: "none", stroke: "#CC0000", strokeWidth: "2.5", strokeLinejoin: "round" })
+        );
+        // speed30: white circle, red border, black "30"
+        if (id === "speed30") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#fff", stroke: "#CC0000", strokeWidth: "6" }),
+          React.createElement("text", { x: "32", y: "32", textAnchor: "middle", dominantBaseline: "middle", fontSize: "24", fontWeight: "900", fill: "#111", fontFamily: "Arial,sans-serif" }, "30")
+        );
+        // noentry: red circle, white horizontal bar
+        if (id === "noentry") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#CC0000", stroke: "#fff", strokeWidth: "3" }),
+          React.createElement("rect", { x: "11", y: "26", width: "42", height: "12", rx: "2", fill: "#fff" })
+        );
+        // crossing: red-bordered white triangle (pointing up), black walking figure inside
+        if (id === "crossing") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("polygon", { points: "32,4 61,56 3,56", fill: "#fff", stroke: "#CC0000", strokeWidth: "4.5", strokeLinejoin: "round" }),
+          React.createElement("circle", { cx: "32", cy: "22", r: "3.5", fill: "#111" }),
+          React.createElement("line", { x1: "32", y1: "27", x2: "32", y2: "40", stroke: "#111", strokeWidth: "3", strokeLinecap: "round" }),
+          React.createElement("line", { x1: "32", y1: "32", x2: "25", y2: "37", stroke: "#111", strokeWidth: "2.5", strokeLinecap: "round" }),
+          React.createElement("line", { x1: "32", y1: "32", x2: "39", y2: "37", stroke: "#111", strokeWidth: "2.5", strokeLinecap: "round" }),
+          React.createElement("line", { x1: "32", y1: "40", x2: "27", y2: "50", stroke: "#111", strokeWidth: "2.5", strokeLinecap: "round" }),
+          React.createElement("line", { x1: "32", y1: "40", x2: "37", y2: "50", stroke: "#111", strokeWidth: "2.5", strokeLinecap: "round" })
+        );
+        // roundabout: blue circle, 3 white curved arrows going clockwise around centre
+        if (id === "roundabout") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#003399" }),
+          React.createElement("circle", { cx: "32", cy: "32", r: "10", fill: "#003399", stroke: "#fff", strokeWidth: "2.5" }),
+          React.createElement("path", { d: "M32 10 A22 22 0 0 1 54 32", fill: "none", stroke: "#fff", strokeWidth: "4", strokeLinecap: "round" }),
+          React.createElement("polygon", { points: "54,24 54,34 62,29", fill: "#fff" }),
+          React.createElement("path", { d: "M54 32 A22 22 0 0 1 20 50", fill: "none", stroke: "#fff", strokeWidth: "4", strokeLinecap: "round" }),
+          React.createElement("polygon", { points: "14,46 22,54 24,44", fill: "#fff" }),
+          React.createElement("path", { d: "M20 50 A22 22 0 0 1 32 10", fill: "none", stroke: "#fff", strokeWidth: "4", strokeLinecap: "round" }),
+          React.createElement("polygon", { points: "24,4 32,10 26,16", fill: "#fff" })
+        );
+        // noovertake: white circle, red border, black car + red car side by side, red diagonal bar
+        if (id === "noovertake") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#fff", stroke: "#CC0000", strokeWidth: "5" }),
+          React.createElement("rect", { x: "10", y: "30", width: "18", height: "10", rx: "3", fill: "#333" }),
+          React.createElement("rect", { x: "13", y: "26", width: "12", height: "6", rx: "2", fill: "#333" }),
+          React.createElement("rect", { x: "36", y: "28", width: "18", height: "10", rx: "3", fill: "#CC0000" }),
+          React.createElement("rect", { x: "39", y: "24", width: "12", height: "6", rx: "2", fill: "#CC0000" }),
+          React.createElement("line", { x1: "8", y1: "8", x2: "56", y2: "56", stroke: "#CC0000", strokeWidth: "5", strokeLinecap: "round" })
+        );
+        // keepleft: blue circle, white arrow pointing left-down (mandatory direction)
+        if (id === "keepleft") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#003399" }),
+          React.createElement("path", { d: "M44 14 L44 32 L52 32 L32 52 L12 32 L20 32 L20 14 Z", fill: "#fff" })
+        );
+        // yield (give way ahead): white triangle pointing up, red border, red "GIVE WAY" text
+        if (id === "yield") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("polygon", { points: "32,4 61,58 3,58", fill: "#fff", stroke: "#CC0000", strokeWidth: "4.5", strokeLinejoin: "round" }),
+          React.createElement("text", { x: "32", y: "44", textAnchor: "middle", dominantBaseline: "middle", fontSize: "8.5", fontWeight: "900", fill: "#CC0000", fontFamily: "Arial,sans-serif" }, "GIVE"),
+          React.createElement("text", { x: "32", y: "53", textAnchor: "middle", dominantBaseline: "middle", fontSize: "8.5", fontWeight: "900", fill: "#CC0000", fontFamily: "Arial,sans-serif" }, "WAY")
+        );
+        // national speed limit: white circle, red border, single black diagonal stripe
+        if (id === "national") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#fff", stroke: "#CC0000", strokeWidth: "6" }),
+          React.createElement("line", { x1: "42", y1: "8", x2: "22", y2: "56", stroke: "#111", strokeWidth: "6", strokeLinecap: "round" })
+        );
+        // ── FAKE / WRONG SIGNS ─────────────────────────────────────────────────
+        // fake1: blue octagon STOP (wrong colour)
+        if (id === "fake1") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("polygon", { points: "20,4 44,4 60,20 60,44 44,60 20,60 4,44 4,20", fill: "#1a56a0", stroke: "#fff", strokeWidth: "3.5" }),
+          React.createElement("text", { x: "32", y: "36", textAnchor: "middle", dominantBaseline: "middle", fontSize: "13", fontWeight: "900", fill: "#fff", fontFamily: "Arial,sans-serif", letterSpacing: "1" }, "STOP")
+        );
+        // fake2: triangle pointing UP (not inverted) with give way text — wrong orientation
+        if (id === "fake2") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("polygon", { points: "32,4 62,56 2,56", fill: "#fff", stroke: "#CC0000", strokeWidth: "4.5", strokeLinejoin: "round" }),
+          React.createElement("text", { x: "32", y: "42", textAnchor: "middle", dominantBaseline: "middle", fontSize: "8", fontWeight: "900", fill: "#CC0000", fontFamily: "Arial,sans-serif" }, "STOP")
+        );
+        // fake3: green no-entry (wrong colour)
+        if (id === "fake3") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#1a7a3c", stroke: "#fff", strokeWidth: "3" }),
+          React.createElement("rect", { x: "11", y: "26", width: "42", height: "12", rx: "2", fill: "#fff" })
+        );
+        // fake4: square speed sign (wrong shape — should be circle)
+        if (id === "fake4") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("rect", { x: "4", y: "4", width: "56", height: "56", rx: "5", fill: "#fff", stroke: "#CC0000", strokeWidth: "6" }),
+          React.createElement("text", { x: "32", y: "32", textAnchor: "middle", dominantBaseline: "middle", fontSize: "24", fontWeight: "900", fill: "#111", fontFamily: "Arial,sans-serif" }, "40")
+        );
+        // fake5: yellow circle with black bar — invented sign
+        if (id === "fake5") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("circle", { cx: "32", cy: "32", r: "29", fill: "#f5c400", stroke: "#111", strokeWidth: "4" }),
+          React.createElement("rect", { x: "11", y: "26", width: "42", height: "12", rx: "2", fill: "#111" })
+        );
+        // fake6: red triangle with exclamation — not a real UK road sign shape/use
+        if (id === "fake6") return React.createElement("svg", { viewBox: v, width: s, height: s },
+          React.createElement("polygon", { points: "32,4 61,58 3,58", fill: "#CC0000", stroke: "#fff", strokeWidth: "3", strokeLinejoin: "round" }),
+          React.createElement("text", { x: "32", y: "46", textAnchor: "middle", dominantBaseline: "middle", fontSize: "28", fontWeight: "900", fill: "#fff", fontFamily: "Arial,sans-serif" }, "!")
+        );
+        return null;
+      }
+      function ItemIcon({ e: id, size }) {
+        if (id && id.startsWith("svg:"))
+          return React.createElement("span", { className: "item-e", style: { lineHeight: 1, pointerEvents: "none" } },
+            React.createElement(RoadSignSVG, { id: id.slice(4) })
+          );
+        return React.createElement("span", { className: "item-e", style: { fontSize: size } }, id);
+      }
+      function useMeasure() {
+        const e = useRef(null),
+          [t, a] = useState(0);
+        return (
+          useEffect(() => {
+            const n = e.current;
+            if (!n) return;
+            a(n.getBoundingClientRect().width);
+            const d = new ResizeObserver((h) => a(h[0].contentRect.width));
+            return (d.observe(n), () => d.disconnect());
+          }, []),
+          [e, t]
+        );
+      }
+      function useToast() {
+        const [e, t] = useState(null),
+          a = useRef(),
+          n = useCallback((d, h, s) => {
+            (clearTimeout(a.current),
+              t({ kind: d, title: h, sub: s, key: Math.random() }),
+              (a.current = setTimeout(() => t(null), 2e3)));
+          }, []);
+        return (useEffect(() => () => clearTimeout(a.current), []), [e, n]);
+      }
+      function Toast({ toast: e }) {
+        return React.createElement(
+          "div",
+          { className: "toast-wrap", "aria-live": "polite" },
+          e &&
+            React.createElement(
+              "div",
+              { key: e.key, className: "toast " + e.kind },
+              React.createElement(
+                "span",
+                { className: "toast-ico", "aria-hidden": "true" },
+                e.kind === "ok"
+                  ? "\u2713"
+                  : e.kind === "bad"
+                    ? "\u2715"
+                    : "\u2605",
+              ),
+              React.createElement(
+                "div",
+                { className: "toast-text" },
+                React.createElement("strong", null, e.title),
+                e.sub && React.createElement("span", null, e.sub),
+              ),
+            ),
+        );
+      }
+      function useFloats() {
+        const [e, t] = useState([]),
+          a = useCallback((n, d, h, s) => {
+            const f = Math.random();
+            (t((y) => [...y, { id: f, x: n, y: d, text: h, kind: s }]),
+              setTimeout(() => t((y) => y.filter((k) => k.id !== f)), 1150));
+          }, []);
+        return [e, a];
+      }
+      function Floats({ floats: e }) {
+        return e.map((t) =>
+          React.createElement(
+            "div",
+            {
+              key: t.id,
+              className: "float " + t.kind,
+              style: { left: t.x, top: t.y },
+            },
+            t.text,
+          ),
+        );
+      }
+      function GameHeader({
+        title: e,
+        onBack: t,
+        stats: a,
+        onSubmit: n,
+        onHelp: d,
+        ready: h,
+      }) {
+        return React.createElement(
+          "header",
+          { className: "game-header" },
+          React.createElement(
+            "div",
+            { className: "gh-inner" },
+            React.createElement(
+              "button",
+              { className: "btn-back", onClick: t },
+              "\u2190 Back to Games",
+            ),
+            React.createElement("div", { className: "gh-title" }, e),
+            React.createElement(
+              "div",
+              { className: "gh-stats" },
+              a.map((s) =>
+                React.createElement(
+                  "div",
+                  {
+                    className: "stat" + (s.tone ? " " + s.tone : ""),
+                    key: s.label,
+                  },
+                  React.createElement(
+                    "span",
+                    { className: "stat-label" },
+                    s.label,
+                  ),
+                  React.createElement(
+                    "span",
+                    { className: "stat-val", key: String(s.value) },
+                    s.value,
+                  ),
+                ),
+              ),
+            ),
+            React.createElement(
+              "div",
+              { className: "gh-actions" },
+              React.createElement(
+                "button",
+                {
+                  className: "btn-icon",
+                  onClick: d,
+                  "aria-label": "How to play",
+                  title: "How to play",
+                },
+                "?",
+              ),
+              React.createElement(
+                "button",
+                { className: "btn-submit" + (h ? " ready" : ""), onClick: n },
+                "Submit",
+              ),
+            ),
+          ),
+        );
+      }
+      function Modal({ children: e, label: t, onClose: a }) {
+        return (
+          useEffect(() => {
+            const n = document.body.style.overflow;
+            document.body.style.overflow = "hidden";
+            const d = (h) => {
+              h.key === "Escape" && a && a();
+            };
+            return (
+              window.addEventListener("keydown", d),
+              () => {
+                ((document.body.style.overflow = n),
+                  window.removeEventListener("keydown", d));
+              }
+            );
+          }, [a]),
+          React.createElement(
+            "div",
+            { className: "modal-backdrop", role: "presentation" },
+            React.createElement(
+              "div",
+              {
+                className: "modal",
+                role: "dialog",
+                "aria-modal": "true",
+                "aria-label": t,
+              },
+              e,
+            ),
+          )
+        );
+      }
+      function HowToPlay({
+        title: e,
+        steps: t,
+        children: a,
+        onStart: n,
+        started: d,
+      }) {
+        return React.createElement(
+          Modal,
+          { label: "How to play " + e, onClose: d ? n : null },
+          React.createElement(
+            "div",
+            { className: "howto" },
+            React.createElement("p", { className: "howto-kicker" }, e),
+            React.createElement("h2", null, "How to play"),
+            React.createElement(
+              "ol",
+              { className: "steps" },
+              t.map((h, s) =>
+                React.createElement(
+                  "li",
+                  { key: s },
+                  React.createElement("span", { className: "step-n" }, s + 1),
+                  React.createElement("span", null, h),
+                ),
+              ),
+            ),
+            a,
+            React.createElement(
+              "button",
+              { className: "btn-primary wide", onClick: n, autoFocus: !0 },
+              d ? "Back to the game" : "Start playing",
+            ),
+          ),
+        );
+      }
+      function ResultModal({
+        title: e,
+        score: t,
+        max: a,
+        lines: n,
+        formula: d,
+        extra: h,
+        message: s,
+        onAgain: f,
+        onBack: y,
+      }) {
+        const k = a ? t / a : 0,
+          [b, D] = useState(0),
+          [F, S] = useState(0);
+        useEffect(() => {
+          const v = requestAnimationFrame(() => D(k));
+          let H = null,
+            w;
+          const P = (W) => {
+            H === null && (H = W);
+            const l = Math.min(1, (W - H) / 900);
+            (S(Math.round(t * (1 - Math.pow(1 - l, 3)))),
+              l < 1 && (w = requestAnimationFrame(P)));
+          };
+          return (
+            (w = requestAnimationFrame(P)),
+            () => {
+              (cancelAnimationFrame(v), cancelAnimationFrame(w));
+            }
+          );
+        }, [k, t]);
+        const L = 56,
+          C = 2 * Math.PI * L,
+          z = k >= 0.7 ? "good" : k >= 0.4 ? "mid" : "low";
+        return React.createElement(
+          Modal,
+          { label: e },
+          React.createElement(
+            "div",
+            { className: "result" },
+            React.createElement("h2", null, e),
+            React.createElement(
+              "div",
+              { className: "ring " + z },
+              React.createElement(
+                "svg",
+                { viewBox: "0 0 140 140", "aria-hidden": "true" },
+                React.createElement("circle", {
+                  cx: "70",
+                  cy: "70",
+                  r: L,
+                  className: "ring-track",
+                }),
+                React.createElement("circle", {
+                  cx: "70",
+                  cy: "70",
+                  r: L,
+                  className: "ring-bar",
+                  strokeDasharray: C,
+                  strokeDashoffset: C * (1 - b),
+                  transform: "rotate(-90 70 70)",
+                }),
+              ),
+              React.createElement(
+                "div",
+                { className: "ring-center" },
+                React.createElement(
+                  "span",
+                  { className: "ring-label" },
+                  "Your score",
+                ),
+                React.createElement("span", { className: "ring-score" }, F),
+                React.createElement(
+                  "span",
+                  { className: "ring-max" },
+                  "of ",
+                  a,
+                ),
+              ),
+            ),
+            React.createElement(
+              "div",
+              { className: "result-lines" },
+              n.map((v) =>
+                React.createElement(
+                  "div",
+                  { key: v.label, className: "rline " + v.tone },
+                  React.createElement("span", { className: "rnum" }, v.value),
+                  React.createElement("span", null, v.label),
+                ),
+              ),
+            ),
+            React.createElement("p", { className: "formula" }, d),
+            h,
+            React.createElement("p", { className: "result-msg" }, s),
+            React.createElement(
+              "div",
+              { className: "result-actions" },
+              React.createElement(
+                "button",
+                { className: "btn-primary", onClick: f, autoFocus: !0 },
+                "Play Again",
+              ),
+              React.createElement(
+                "button",
+                { className: "btn-secondary", onClick: y },
+                "Back to Games",
+              ),
+            ),
+          ),
+        );
+      }
+      function VehicleArt({ v: e }) {
+        const t = "#15181c";
+        return e.kind === "moto"
+          ? React.createElement(
+              "svg",
+              {
+                viewBox: "0 0 26 60",
+                width: "26",
+                height: "60",
+                "aria-hidden": "true",
+              },
+              React.createElement("rect", {
+                x: "9.5",
+                y: "0.5",
+                width: "7",
+                height: "15",
+                rx: "3.5",
+                fill: t,
+              }),
+              React.createElement("rect", {
+                x: "9.5",
+                y: "44.5",
+                width: "7",
+                height: "15",
+                rx: "3.5",
+                fill: t,
+              }),
+              React.createElement("rect", {
+                x: "1",
+                y: "14",
+                width: "24",
+                height: "3.4",
+                rx: "1.7",
+                fill: "#2b3138",
+              }),
+              React.createElement("rect", {
+                x: "7.5",
+                y: "13",
+                width: "11",
+                height: "35",
+                rx: "5.5",
+                fill: e.color,
+              }),
+              React.createElement("rect", {
+                x: "9.5",
+                y: "38",
+                width: "7",
+                height: "9",
+                rx: "2",
+                fill: "#222",
+              }),
+              React.createElement("circle", {
+                cx: "13",
+                cy: "28",
+                r: "7.6",
+                fill: "#1f2328",
+              }),
+              React.createElement("path", {
+                d: "M7.2 25.5 Q13 20 18.8 25.5 L17.6 27 Q13 23.4 8.4 27 Z",
+                fill: "#9fc4e8",
+              }),
+              React.createElement("rect", {
+                x: "10.5",
+                y: "1.6",
+                width: "5",
+                height: "3",
+                rx: "1.5",
+                fill: "#fff7cf",
+              }),
+            )
+          : e.kind === "van"
+            ? React.createElement(
+                "svg",
+                {
+                  viewBox: "0 0 56 110",
+                  width: "56",
+                  height: "110",
+                  "aria-hidden": "true",
+                },
+                [
+                  [0, 17],
+                  [49, 17],
+                  [0, 78],
+                  [49, 78],
+                ].map(([a, n], d) =>
+                  React.createElement("rect", {
+                    key: d,
+                    x: a,
+                    y: n,
+                    width: "7",
+                    height: "17",
+                    rx: "2.5",
+                    fill: t,
+                  }),
+                ),
+                React.createElement("rect", {
+                  x: "2.5",
+                  y: "2",
+                  width: "51",
+                  height: "106",
+                  rx: "9",
+                  fill: e.color,
+                }),
+                React.createElement("path", {
+                  d: "M8 31 L48 31 L45 15 Q28 10.5 11 15 Z",
+                  fill: "#1c2630",
+                }),
+                React.createElement("rect", {
+                  x: "6",
+                  y: "35",
+                  width: "44",
+                  height: "69",
+                  rx: "4",
+                  fill: "#fff",
+                  opacity: ".24",
+                }),
+                React.createElement("rect", {
+                  x: "6",
+                  y: "35",
+                  width: "44",
+                  height: "2.5",
+                  fill: "#000",
+                  opacity: ".12",
+                }),
+                React.createElement(
+                  "text",
+                  {
+                    x: "28",
+                    y: "70",
+                    transform: "rotate(-90 28 70)",
+                    textAnchor: "middle",
+                    dominantBaseline: "middle",
+                    fontSize: "9.5",
+                    fontWeight: "800",
+                    letterSpacing: "1.2",
+                    fill: "#5b4300",
+                    fontFamily: "Overpass, sans-serif",
+                  },
+                  "DELIVERY",
+                ),
+                React.createElement("rect", {
+                  x: "7",
+                  y: "3.6",
+                  width: "10",
+                  height: "4",
+                  rx: "2",
+                  fill: "#fff7cf",
+                }),
+                React.createElement("rect", {
+                  x: "39",
+                  y: "3.6",
+                  width: "10",
+                  height: "4",
+                  rx: "2",
+                  fill: "#fff7cf",
+                }),
+                React.createElement("rect", {
+                  x: "7",
+                  y: "103.5",
+                  width: "10",
+                  height: "3",
+                  rx: "1.5",
+                  fill: "#ff4d4d",
+                }),
+                React.createElement("rect", {
+                  x: "39",
+                  y: "103.5",
+                  width: "10",
+                  height: "3",
+                  rx: "1.5",
+                  fill: "#ff4d4d",
+                }),
+              )
+            : React.createElement(
+                "svg",
+                {
+                  viewBox: "0 0 46 88",
+                  width: "46",
+                  height: "88",
+                  "aria-hidden": "true",
+                },
+                [
+                  [0, 14],
+                  [40, 14],
+                  [0, 60],
+                  [40, 60],
+                ].map(([a, n], d) =>
+                  React.createElement("rect", {
+                    key: d,
+                    x: a,
+                    y: n,
+                    width: "6",
+                    height: "15",
+                    rx: "2.2",
+                    fill: t,
+                  }),
+                ),
+                React.createElement("rect", {
+                  x: "2.5",
+                  y: "2",
+                  width: "41",
+                  height: "84",
+                  rx: "13",
+                  fill: e.color,
+                }),
+                React.createElement("rect", {
+                  x: "0",
+                  y: "31",
+                  width: "4",
+                  height: "5",
+                  rx: "1.6",
+                  fill: e.color,
+                  stroke: "#000",
+                  strokeOpacity: ".2",
+                }),
+                React.createElement("rect", {
+                  x: "42",
+                  y: "31",
+                  width: "4",
+                  height: "5",
+                  rx: "1.6",
+                  fill: e.color,
+                  stroke: "#000",
+                  strokeOpacity: ".2",
+                }),
+                React.createElement("path", {
+                  d: "M9 37 L37 37 L34.5 23 Q23 18.6 11.5 23 Z",
+                  fill: "#1c2630",
+                }),
+                React.createElement("rect", {
+                  x: "9.5",
+                  y: "37",
+                  width: "27",
+                  height: "27",
+                  rx: "4",
+                  fill: "#fff",
+                  opacity: ".17",
+                }),
+                React.createElement("path", {
+                  d: "M10 64 L36 64 L34 74 Q23 77.6 12 74 Z",
+                  fill: "#1c2630",
+                }),
+                React.createElement("rect", {
+                  x: "6",
+                  y: "3.6",
+                  width: "9",
+                  height: "4",
+                  rx: "2",
+                  fill: "#fff7cf",
+                }),
+                React.createElement("rect", {
+                  x: "31",
+                  y: "3.6",
+                  width: "9",
+                  height: "4",
+                  rx: "2",
+                  fill: "#fff7cf",
+                }),
+                React.createElement("rect", {
+                  x: "6",
+                  y: "81.2",
+                  width: "9",
+                  height: "3.4",
+                  rx: "1.5",
+                  fill: "#ff4d4d",
+                }),
+                React.createElement("rect", {
+                  x: "31",
+                  y: "81.2",
+                  width: "9",
+                  height: "3.4",
+                  rx: "1.5",
+                  fill: "#ff4d4d",
+                }),
+                e.kind === "ev" &&
+                  React.createElement(
+                    "g",
+                    null,
+                    React.createElement("circle", {
+                      cx: "23",
+                      cy: "50.5",
+                      r: "9",
+                      fill: "#fff",
+                    }),
+                    React.createElement("path", {
+                      d: "M24.5 43 L18.5 51.5 L22.6 51.5 L21.4 58 L27.5 49.3 L23.4 49.3 Z",
+                      fill: "#0f8a76",
+                    }),
+                  ),
+                e.kind === "accessible" &&
+                  React.createElement(
+                    "g",
+                    null,
+                    React.createElement("rect", {
+                      x: "13.5",
+                      y: "41",
+                      width: "19",
+                      height: "19",
+                      rx: "4",
+                      fill: "#1D4FD8",
+                      stroke: "#fff",
+                      strokeWidth: "1.6",
+                    }),
+                    React.createElement(AccessIcon, {
+                      x: 23,
+                      y: 50.5,
+                      s: 0.62,
+                    }),
+                  ),
+              );
+      }
+      function AccessIcon({ x: e, y: t, s: a = 1, color: n = "#fff" }) {
+        return React.createElement(
+          "g",
+          {
+            transform: `translate(${e} ${t}) scale(${a})`,
+            fill: "none",
+            stroke: n,
+            strokeWidth: "2.6",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+          },
+          React.createElement("circle", {
+            cx: "-1.5",
+            cy: "-10",
+            r: "2.4",
+            fill: n,
+            stroke: "none",
+          }),
+          React.createElement("path", { d: "M-2 -6 L-1 2 L6 2 L9 9" }),
+          React.createElement("path", { d: "M-1 -2 L5 -2" }),
+          React.createElement("path", { d: "M-5.2 -1.5 A7.5 7.5 0 1 0 5 8.5" }),
+        );
+      }
+      function SceneDefs() {
+        return React.createElement(
+          "defs",
+          null,
+          React.createElement(
+            "pattern",
+            {
+              id: "pk-hatch-w",
+              width: "12",
+              height: "12",
+              patternUnits: "userSpaceOnUse",
+              patternTransform: "rotate(45)",
+            },
+            React.createElement("rect", {
+              width: "12",
+              height: "12",
+              fill: "transparent",
+            }),
+            React.createElement("rect", {
+              width: "4",
+              height: "12",
+              fill: "#fff",
+              opacity: ".75",
+            }),
+          ),
+          React.createElement(
+            "pattern",
+            {
+              id: "pk-hatch-r",
+              width: "16",
+              height: "16",
+              patternUnits: "userSpaceOnUse",
+              patternTransform: "rotate(45)",
+            },
+            React.createElement("rect", {
+              width: "16",
+              height: "16",
+              fill: "#7a2a27",
+              opacity: ".25",
+            }),
+            React.createElement("rect", {
+              width: "5",
+              height: "16",
+              fill: "#e5534b",
+              opacity: ".75",
+            }),
+          ),
+          React.createElement(
+            "pattern",
+            {
+              id: "pk-hatch-y",
+              width: "14",
+              height: "14",
+              patternUnits: "userSpaceOnUse",
+              patternTransform: "rotate(-45)",
+            },
+            React.createElement("rect", {
+              width: "14",
+              height: "14",
+              fill: "#f1c233",
+              opacity: ".14",
+            }),
+            React.createElement("rect", {
+              width: "3",
+              height: "14",
+              fill: "#f1c233",
+              opacity: ".55",
+            }),
+          ),
+          React.createElement(
+            "pattern",
+            {
+              id: "pk-paving",
+              width: "24",
+              height: "24",
+              patternUnits: "userSpaceOnUse",
+            },
+            React.createElement("rect", {
+              width: "24",
+              height: "24",
+              fill: "#c9ccc6",
+            }),
+            React.createElement("path", {
+              d: "M0 0 H24 M0 0 V24",
+              stroke: "#b5b9b2",
+              strokeWidth: "1.2",
+            }),
+          ),
+          React.createElement(
+            "radialGradient",
+            { id: "pk-tree", cx: "40%", cy: "38%", r: "65%" },
+            React.createElement("stop", { offset: "0", stopColor: "#6fae6a" }),
+            React.createElement("stop", { offset: "1", stopColor: "#2f6b3c" }),
+          ),
+        );
+      }
+      function Tree({ x: e, y: t, r: a = 18 }) {
+        return React.createElement(
+          "g",
+          null,
+          React.createElement("circle", {
+            cx: e + 3,
+            cy: t + 4,
+            r: a,
+            fill: "#000",
+            opacity: ".18",
+          }),
+          React.createElement("circle", {
+            cx: e,
+            cy: t,
+            r: a,
+            fill: "url(#pk-tree)",
+          }),
+          React.createElement("circle", {
+            cx: e - a * 0.25,
+            cy: t - a * 0.2,
+            r: a * 0.35,
+            fill: "#8cc47f",
+            opacity: ".45",
+          }),
+        );
+      }
+      function SignP({ x: e, y: t }) {
+        return React.createElement(
+          "g",
+          null,
+          React.createElement("rect", {
+            x: e - 14,
+            y: t - 14,
+            width: "28",
+            height: "28",
+            rx: "5",
+            fill: "#1D4F91",
+            stroke: "#fff",
+            strokeWidth: "2.5",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: e,
+              y: t + 1.5,
+              textAnchor: "middle",
+              dominantBaseline: "middle",
+              fontSize: "19",
+              fontWeight: "900",
+              fill: "#fff",
+              fontFamily: "Overpass, sans-serif",
+            },
+            "P",
+          ),
+        );
+      }
+      function SignNoParking({ x: e, y: t }) {
+        return React.createElement(
+          "g",
+          null,
+          React.createElement("circle", {
+            cx: e,
+            cy: t,
+            r: "13",
+            fill: "#1D4F91",
+            stroke: "#D8322B",
+            strokeWidth: "4.5",
+          }),
+          React.createElement("path", {
+            d: `M${e - 8} ${t - 8} L${e + 8} ${t + 8}`,
+            stroke: "#D8322B",
+            strokeWidth: "4",
+          }),
+        );
+      }
+      function SignSpeed({ x: e, y: t, n: a }) {
+        return React.createElement(
+          "g",
+          null,
+          React.createElement("circle", {
+            cx: e,
+            cy: t,
+            r: "14",
+            fill: "#fff",
+            stroke: "#D8322B",
+            strokeWidth: "4",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: e,
+              y: t + 1.5,
+              textAnchor: "middle",
+              dominantBaseline: "middle",
+              fontSize: "13",
+              fontWeight: "900",
+              fill: "#111",
+              fontFamily: "Overpass, sans-serif",
+            },
+            a,
+          ),
+        );
+      }
+      function SignCrossing({ x: e, y: t }) {
+        return React.createElement(
+          "g",
+          null,
+          React.createElement("path", {
+            d: `M${e} ${t - 14} L${e + 15} ${t + 12} L${e - 15} ${t + 12} Z`,
+            fill: "#fff",
+            stroke: "#D8322B",
+            strokeWidth: "3.5",
+            strokeLinejoin: "round",
+          }),
+          React.createElement("circle", {
+            cx: e,
+            cy: t - 1,
+            r: "2.4",
+            fill: "#111",
+          }),
+          React.createElement("path", {
+            d: `M${e} ${t + 1.5} L${e - 3} ${t + 8} M${e} ${t + 1.5} L${e + 3} ${t + 8}`,
+            stroke: "#111",
+            strokeWidth: "2",
+            strokeLinecap: "round",
+          }),
+        );
+      }
+      function Arrow({ x: e, y: t, dir: a }) {
+        const n = { up: 0, right: 90, down: 180, left: 270 }[a];
+        return React.createElement("path", {
+          transform: `translate(${e} ${t}) rotate(${n})`,
+          d: "M0 -22 L11 -6 L4 -6 L4 20 L-4 20 L-4 -6 L-11 -6 Z",
+          fill: "#fff",
+          opacity: ".6",
+        });
+      }
+      function Bay({ s: e }) {
+        const t = e.x - e.w / 2,
+          a = e.y - e.h / 2,
+          n = {
+            accessible: "rgba(29,79,216,.42)",
+            ev: "rgba(19,160,138,.38)",
+            moto: "rgba(238,122,28,.3)",
+            van: "url(#pk-hatch-y)",
+            car: "rgba(255,255,255,.04)",
+          },
+          d = Math.min(e.w, e.h);
+        return React.createElement(
+          "g",
+          null,
+          React.createElement("rect", {
+            x: t,
+            y: a,
+            width: e.w,
+            height: e.h,
+            fill: n[e.kind],
+            stroke: e.kind === "van" ? "#f1c233" : "#fff",
+            strokeWidth: "3",
+            strokeDasharray: e.kind === "van" ? "10 6" : "none",
+            opacity: ".95",
+          }),
+          e.kind === "car" &&
+            React.createElement(
+              "text",
+              {
+                x: e.x,
+                y: e.y,
+                textAnchor: "middle",
+                dominantBaseline: "middle",
+                fontSize: "28",
+                fontWeight: "900",
+                fill: "#fff",
+                opacity: ".28",
+                fontFamily: "Overpass, sans-serif",
+              },
+              "P",
+            ),
+          e.kind === "accessible" &&
+            React.createElement(AccessIcon, { x: e.x, y: e.y + 2, s: d / 34 }),
+          e.kind === "ev" &&
+            React.createElement(
+              "g",
+              null,
+              React.createElement("path", {
+                transform: `translate(${e.x} ${e.y - 6}) scale(1.6)`,
+                d: "M1.5 -8 L-5 1.5 L-0.6 1.5 L-1.8 8.5 L5 -1 L0.6 -1 Z",
+                fill: "#fff",
+              }),
+              React.createElement(
+                "text",
+                {
+                  x: e.x,
+                  y: e.y + 22,
+                  textAnchor: "middle",
+                  fontSize: "12",
+                  fontWeight: "800",
+                  fill: "#fff",
+                  fontFamily: "Overpass, sans-serif",
+                },
+                "EV",
+              ),
+            ),
+          e.kind === "moto" &&
+            React.createElement(
+              "text",
+              {
+                x: e.x,
+                y: e.y,
+                textAnchor: "middle",
+                dominantBaseline: "middle",
+                fontSize: "12",
+                fontWeight: "800",
+                fill: "#fff",
+                letterSpacing: ".5",
+                fontFamily: "Overpass, sans-serif",
+                transform: e.w > e.h ? "" : `rotate(-90 ${e.x} ${e.y})`,
+              },
+              "MOTO",
+            ),
+          e.kind === "van" &&
+            React.createElement(
+              "text",
+              {
+                x: e.x,
+                y: e.y,
+                textAnchor: "middle",
+                dominantBaseline: "middle",
+                fontSize: "14",
+                fontWeight: "900",
+                fill: "#f1c233",
+                letterSpacing: "1",
+                fontFamily: "Overpass, sans-serif",
+                transform: e.w > e.h ? "" : `rotate(-90 ${e.x} ${e.y})`,
+              },
+              "LOADING",
+            ),
+        );
+      }
+      function SceneWide({ L: e }) {
+        const t = [];
+        for (let a = 44; a < 230; a += 26)
+          t.push(
+            React.createElement("rect", {
+              key: a,
+              x: "850",
+              y: a,
+              width: "72",
+              height: "14",
+              fill: "#fff",
+              opacity: ".9",
+            }),
+          );
+        return React.createElement(
+          "svg",
+          {
+            className: "scene",
+            viewBox: `0 0 ${e.W} ${e.H}`,
+            width: e.W,
+            height: e.H,
+            "aria-hidden": "true",
+          },
+          React.createElement(SceneDefs, null),
+          React.createElement("rect", {
+            width: e.W,
+            height: e.H,
+            fill: "#454b53",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "0",
+            width: e.W,
+            height: "36",
+            fill: "url(#pk-paving)",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "36",
+            width: e.W,
+            height: "200",
+            fill: "#33383f",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "40",
+            width: e.W,
+            height: "2.5",
+            fill: "#fff",
+            opacity: ".7",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "229.5",
+            width: e.W,
+            height: "2.5",
+            fill: "#fff",
+            opacity: ".7",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "132",
+            width: e.W,
+            height: "3",
+            fill: "#f1c233",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "138",
+            width: e.W,
+            height: "3",
+            fill: "#f1c233",
+          }),
+          t,
+          React.createElement(Arrow, { x: 250, y: 86, dir: "left" }),
+          React.createElement(Arrow, { x: 680, y: 86, dir: "left" }),
+          React.createElement(Arrow, { x: 300, y: 186, dir: "right" }),
+          React.createElement(Arrow, { x: 760, y: 186, dir: "right" }),
+          React.createElement("rect", {
+            x: "0",
+            y: "236",
+            width: e.W,
+            height: "40",
+            fill: "url(#pk-paving)",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "236",
+            width: e.W,
+            height: "4",
+            fill: "#9fa49c",
+          }),
+          React.createElement("rect", {
+            x: "60",
+            y: "236",
+            width: "100",
+            height: "40",
+            fill: "#454b53",
+          }),
+          React.createElement("rect", {
+            x: "310",
+            y: "290",
+            width: "40",
+            height: "120",
+            fill: "url(#pk-hatch-w)",
+            opacity: ".7",
+          }),
+          React.createElement("rect", {
+            x: "630",
+            y: "290",
+            width: "40",
+            height: "120",
+            fill: "url(#pk-hatch-w)",
+            opacity: ".45",
+          }),
+          e.slots.map((a) => React.createElement(Bay, { key: a.id, s: a })),
+          React.createElement("rect", {
+            x: "583",
+            y: "279",
+            width: "24",
+            height: "14",
+            rx: "3",
+            fill: "#0f8a76",
+            stroke: "#fff",
+            strokeWidth: "1.5",
+          }),
+          React.createElement("rect", {
+            x: "340",
+            y: "512",
+            width: "240",
+            height: "116",
+            fill: "url(#pk-hatch-r)",
+          }),
+          React.createElement("rect", {
+            x: "340",
+            y: "512",
+            width: "240",
+            height: "116",
+            fill: "none",
+            stroke: "#e5534b",
+            strokeWidth: "3",
+          }),
+          React.createElement("rect", {
+            x: "402",
+            y: "554",
+            width: "116",
+            height: "30",
+            rx: "4",
+            fill: "#3b2a2a",
+            opacity: ".85",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: "460",
+              y: "570",
+              textAnchor: "middle",
+              dominantBaseline: "middle",
+              fontSize: "15",
+              fontWeight: "900",
+              fill: "#ff8a83",
+              letterSpacing: "2",
+              fontFamily: "Overpass, sans-serif",
+            },
+            "FIRE LANE",
+          ),
+          React.createElement(Arrow, { x: 330, y: 460, dir: "right" }),
+          React.createElement(Arrow, { x: 640, y: 460, dir: "right" }),
+          React.createElement("rect", {
+            x: "704",
+            y: "290",
+            width: "282",
+            height: "118",
+            rx: "6",
+            fill: "#d9dbd5",
+          }),
+          React.createElement("rect", {
+            x: "704",
+            y: "290",
+            width: "282",
+            height: "118",
+            rx: "6",
+            fill: "none",
+            stroke: "#a9ada6",
+            strokeWidth: "3",
+          }),
+          React.createElement("rect", {
+            x: "730",
+            y: "310",
+            width: "44",
+            height: "30",
+            rx: "3",
+            fill: "#b7bbb3",
+          }),
+          React.createElement("rect", {
+            x: "790",
+            y: "310",
+            width: "44",
+            height: "30",
+            rx: "3",
+            fill: "#b7bbb3",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: "900",
+              y: "356",
+              textAnchor: "middle",
+              fontSize: "15",
+              fontWeight: "800",
+              fill: "#6d726b",
+              letterSpacing: "1.5",
+              fontFamily: "Overpass, sans-serif",
+            },
+            "OFFICE",
+          ),
+          React.createElement("rect", {
+            x: "18",
+            y: "300",
+            width: "80",
+            height: "80",
+            rx: "12",
+            fill: "#5b8a52",
+          }),
+          React.createElement(Tree, { x: 58, y: 340, r: 26 }),
+          React.createElement("rect", {
+            x: "740",
+            y: "520",
+            width: "240",
+            height: "104",
+            rx: "14",
+            fill: "#5b8a52",
+          }),
+          React.createElement(Tree, { x: 790, y: 572, r: 28 }),
+          React.createElement(Tree, { x: 862, y: 566, r: 24 }),
+          React.createElement(Tree, { x: 932, y: 576, r: 27 }),
+          React.createElement("rect", {
+            x: "18",
+            y: "520",
+            width: "190",
+            height: "104",
+            rx: "14",
+            fill: "#5b8a52",
+          }),
+          React.createElement(Tree, { x: 70, y: 572, r: 28 }),
+          React.createElement(Tree, { x: 150, y: 568, r: 25 }),
+          [110, 330, 520, 760, 970].map((a) =>
+            React.createElement(Tree, { key: a, x: a, y: 16, r: 17 }),
+          ),
+          React.createElement(SignSpeed, { x: 36, y: 18, n: "30" }),
+          React.createElement(SignP, { x: 184, y: 258 }),
+          React.createElement(SignNoParking, { x: 598, y: 526 }),
+          React.createElement(SignCrossing, { x: 952, y: 256 }),
+        );
+      }
+      function SceneTall({ L: e }) {
+        const t = [];
+        for (let a = 42; a < 228; a += 26)
+          t.push(
+            React.createElement("rect", {
+              key: a,
+              x: a,
+              y: "50",
+              width: "14",
+              height: "72",
+              fill: "#fff",
+              opacity: ".9",
+            }),
+          );
+        return React.createElement(
+          "svg",
+          {
+            className: "scene",
+            viewBox: `0 0 ${e.W} ${e.H}`,
+            width: e.W,
+            height: e.H,
+            "aria-hidden": "true",
+          },
+          React.createElement(SceneDefs, null),
+          React.createElement("rect", {
+            width: e.W,
+            height: e.H,
+            fill: "#454b53",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "0",
+            width: "34",
+            height: e.H,
+            fill: "url(#pk-paving)",
+          }),
+          React.createElement("rect", {
+            x: "34",
+            y: "0",
+            width: "200",
+            height: e.H,
+            fill: "#33383f",
+          }),
+          React.createElement("rect", {
+            x: "38",
+            y: "0",
+            width: "2.5",
+            height: e.H,
+            fill: "#fff",
+            opacity: ".7",
+          }),
+          React.createElement("rect", {
+            x: "227.5",
+            y: "0",
+            width: "2.5",
+            height: e.H,
+            fill: "#fff",
+            opacity: ".7",
+          }),
+          React.createElement("rect", {
+            x: "130",
+            y: "0",
+            width: "3",
+            height: e.H,
+            fill: "#f1c233",
+          }),
+          React.createElement("rect", {
+            x: "136",
+            y: "0",
+            width: "3",
+            height: e.H,
+            fill: "#f1c233",
+          }),
+          t,
+          React.createElement(Arrow, { x: 84, y: 230, dir: "down" }),
+          React.createElement(Arrow, { x: 84, y: 640, dir: "down" }),
+          React.createElement(Arrow, { x: 184, y: 300, dir: "up" }),
+          React.createElement(Arrow, { x: 184, y: 760, dir: "up" }),
+          React.createElement("rect", {
+            x: "234",
+            y: "0",
+            width: "38",
+            height: e.H,
+            fill: "url(#pk-paving)",
+          }),
+          React.createElement("rect", {
+            x: "234",
+            y: "0",
+            width: "4",
+            height: e.H,
+            fill: "#9fa49c",
+          }),
+          React.createElement("rect", {
+            x: "234",
+            y: "895",
+            width: "38",
+            height: "90",
+            fill: "#454b53",
+          }),
+          React.createElement("rect", {
+            x: "470",
+            y: "120",
+            width: "120",
+            height: "40",
+            fill: "url(#pk-hatch-w)",
+            opacity: ".7",
+          }),
+          React.createElement("rect", {
+            x: "470",
+            y: "440",
+            width: "120",
+            height: "36",
+            fill: "url(#pk-hatch-w)",
+            opacity: ".45",
+          }),
+          e.slots.map((a) => React.createElement(Bay, { key: a.id, s: a })),
+          React.createElement("rect", {
+            x: "586",
+            y: "393",
+            width: "12",
+            height: "24",
+            rx: "3",
+            fill: "#0f8a76",
+            stroke: "#fff",
+            strokeWidth: "1.5",
+          }),
+          React.createElement("rect", {
+            x: "288",
+            y: "560",
+            width: "82",
+            height: "300",
+            fill: "url(#pk-hatch-r)",
+          }),
+          React.createElement("rect", {
+            x: "288",
+            y: "560",
+            width: "82",
+            height: "300",
+            fill: "none",
+            stroke: "#e5534b",
+            strokeWidth: "3",
+          }),
+          React.createElement("rect", {
+            x: "314",
+            y: "610",
+            width: "30",
+            height: "120",
+            rx: "4",
+            fill: "#3b2a2a",
+            opacity: ".85",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: "329",
+              y: "670",
+              transform: "rotate(-90 329 670)",
+              textAnchor: "middle",
+              dominantBaseline: "middle",
+              fontSize: "15",
+              fontWeight: "900",
+              fill: "#ff8a83",
+              letterSpacing: "2",
+              fontFamily: "Overpass, sans-serif",
+            },
+            "FIRE LANE",
+          ),
+          React.createElement(Arrow, { x: 425, y: 560, dir: "down" }),
+          React.createElement(Arrow, { x: 425, y: 140, dir: "down" }),
+          React.createElement("rect", {
+            x: "286",
+            y: "24",
+            width: "88",
+            height: "186",
+            rx: "6",
+            fill: "#d9dbd5",
+          }),
+          React.createElement("rect", {
+            x: "286",
+            y: "24",
+            width: "88",
+            height: "186",
+            rx: "6",
+            fill: "none",
+            stroke: "#a9ada6",
+            strokeWidth: "3",
+          }),
+          React.createElement("rect", {
+            x: "300",
+            y: "40",
+            width: "30",
+            height: "34",
+            rx: "3",
+            fill: "#b7bbb3",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: "330",
+              y: "150",
+              transform: "rotate(-90 330 150)",
+              textAnchor: "middle",
+              dominantBaseline: "middle",
+              fontSize: "15",
+              fontWeight: "800",
+              fill: "#6d726b",
+              letterSpacing: "1.5",
+              fontFamily: "Overpass, sans-serif",
+            },
+            "OFFICE",
+          ),
+          React.createElement("rect", {
+            x: "474",
+            y: "712",
+            width: "114",
+            height: "150",
+            rx: "14",
+            fill: "#5b8a52",
+          }),
+          React.createElement(Tree, { x: 512, y: 750, r: 26 }),
+          React.createElement(Tree, { x: 552, y: 820, r: 28 }),
+          React.createElement("rect", {
+            x: "286",
+            y: "880",
+            width: "90",
+            height: "100",
+            rx: "14",
+            fill: "#5b8a52",
+          }),
+          React.createElement(Tree, { x: 330, y: 930, r: 30 }),
+          [170, 420, 680, 960].map((a) =>
+            React.createElement(Tree, { key: a, x: 17, y: a, r: 16 }),
+          ),
+          React.createElement(SignSpeed, { x: 17, y: 40, n: "30" }),
+          React.createElement(SignP, { x: 253, y: 870 }),
+          React.createElement(SignNoParking, { x: 300, y: 546 }),
+          React.createElement(SignCrossing, { x: 253, y: 150 }),
+        );
+      }
+      function newParkingRound() {
+        const e = shuffle([...Array(11).keys()]).slice(0, VEHICLES.length),
+          t = {};
+        return (
+          VEHICLES.forEach((a, n) => (t[a.id] = { t: "w", i: e[n] })),
+          { placement: t, wrongDrops: 0 }
+        );
+      }
+      function ParkingGame({ onBack: e }) {
+        const [t, a] = useState(newParkingRound),
+          [n, d] = useState(null),
+          h = useRef(null),
+          [s, f] = useState(!0),
+          [y, k] = useState(!1),
+          [b, D] = useState(!1),
+          [F, S] = useState({}),
+          [L, C] = useToast(),
+          [z, v] = useFloats(),
+          [H, w] = useMeasure(),
+          P = useRef(null),
+          W = w && w < 640 ? "tall" : "wide",
+          l = PARK_LAYOUTS[W],
+          N = w ? w / l.W : 0,
+          $ = W === "wide" && N >= 0.74,
+          { placement: x, wrongDrops: I } = t,
+          u = VEHICLES.filter((i) => x[i.id].t === "s").length,
+          M = u * 30,
+          B = VEHICLES.length * 30,
+          T = (i) => {
+            const r = x[i];
+            if (r.t === "s") {
+              const o = l.slots.find((g) => g.id === r.s);
+              return { x: o.x, y: o.y, rot: o.rot };
+            }
+            const c = l.wrong[r.i];
+            return { x: c.x, y: c.y, rot: c.r };
+          },
+          O = (i) => VEHICLES.find((r) => x[r.id].t === "s" && x[r.id].s === i),
+          G = (i) => {
+            const r = P.current.getBoundingClientRect();
+            return { x: (i.clientX - r.left) / N, y: (i.clientY - r.top) / N };
+          },
+          j = (i, r) => {
+            let c = null,
+              o = 1 / 0;
+            for (const g of l.slots)
+              if (
+                Math.abs(i - g.x) <= g.w / 2 + 8 &&
+                Math.abs(r - g.y) <= g.h / 2 + 8
+              ) {
+                const p = Math.hypot(i - g.x, r - g.y);
+                p < o && ((o = p), (c = g));
+              }
+            return c;
+          },
+          Z = (i, r) => {
+            if (x[r.id].t === "s" || b || s) return;
+            (i.preventDefault(),
+              i.currentTarget.setPointerCapture(i.pointerId));
+            const c = G(i),
+              o = T(r.id),
+              g = {
+                id: r.id,
+                x: o.x,
+                y: o.y,
+                rot: o.rot,
+                dx: c.x - o.x,
+                dy: c.y - o.y,
+                sx: o.x,
+                sy: o.y,
+              };
+            ((h.current = g), d(g));
+          },
+          K = (i) => {
+            const r = h.current;
+            if (!r) return;
+            const c = G(i),
+              o = {
+                ...r,
+                x: clamp(c.x - r.dx, 10, l.W - 10),
+                y: clamp(c.y - r.dy, 10, l.H - 10),
+              };
+            ((h.current = o), d(o));
+          },
+          Q = (i) => {
+            const r = h.current;
+            if (
+              ((h.current = null),
+              d(null),
+              !r || i || Math.hypot(r.x - r.sx, r.y - r.sy) < 8)
+            )
+              return;
+            const c = VEHICLES.find((p) => p.id === r.id),
+              o = j(r.x, r.y),
+              g = o && O(o.id);
+            if (o && o.kind === c.kind && !g)
+              (a((m) => ({
+                ...m,
+                placement: { ...m.placement, [c.id]: { t: "s", s: o.id } },
+              })),
+                v(o.x, o.y - 20, "+30 Points", "ok"),
+                S((m) => ({ ...m, [c.id]: "ok" })),
+                setTimeout(() => S((m) => ({ ...m, [c.id]: null })), 900),
+                u + 1 === VEHICLES.length
+                  ? C(
+                      "win",
+                      "All 7 vehicles parked correctly",
+                      "Select Submit to see your final score",
+                    )
+                  : C(
+                      "ok",
+                      "Correct Parking! +30",
+                      `${c.name} parked in the right bay`,
+                    ));
+            else {
+              let p;
+              (o
+                ? g
+                  ? (p = "That space is already taken")
+                  : o.kind === "car" && OWN_BAY_HINT[c.kind]
+                    ? (p = OWN_BAY_HINT[c.kind])
+                    : (p = BAY_RULES[o.kind])
+                : (p = "That isn't a marked parking space"),
+                a((m) => ({ ...m, wrongDrops: m.wrongDrops + 1 })),
+                v(r.x, r.y - 30, "0 Points", "bad"),
+                S((m) => ({ ...m, [c.id]: "bad" })),
+                setTimeout(() => S((m) => ({ ...m, [c.id]: null })), 700),
+                C("bad", "Incorrect Parking \u2014 Try Again", p));
+            }
+          },
+          U = () => {
+            (a(newParkingRound()), D(!1), S({}));
+          },
+          R = n && VEHICLES.find((i) => i.id === n.id),
+          A = n ? j(n.x, n.y) : null,
+          q = A && R && A.kind === R.kind && !O(A.id),
+          E = VEHICLES.filter((i) => x[i.id].t !== "s"),
+          V = M / B,
+          _ =
+            V === 1
+              ? "Perfect parking! Every vehicle is safe, legal and out of the way."
+              : V >= 0.7
+                ? "Great job! Keep practicing safe parking habits."
+                : V >= 0.4
+                  ? "Good effort. Check the bay markings before you park."
+                  : "Keep practicing. Every bay has a rule worth knowing.";
+        return React.createElement(
+          "div",
+          { className: "game-page" },
+          React.createElement(GameHeader, {
+            title: "Wrong Parking Challenge",
+            onBack: e,
+            onHelp: () => f(!0),
+            onSubmit: () => D(!0),
+            ready: u === VEHICLES.length,
+            stats: [
+              {
+                label: "Correct",
+                value: `${u} / ${VEHICLES.length}`,
+                tone: u ? "ok" : "",
+              },
+              { label: "Incorrect drops", value: I, tone: I ? "bad" : "" },
+              { label: "Score", value: M },
+            ],
+          }),
+          React.createElement(
+            "main",
+            { className: "game-body" },
+            React.createElement(
+              "section",
+              { className: "game-intro" },
+              React.createElement(
+                "div",
+                null,
+                React.createElement("h1", null, "Wrong Parking Challenge"),
+                React.createElement(
+                  "p",
+                  { className: "lead" },
+                  "Drag each vehicle into its correct parking space.",
+                ),
+                React.createElement(
+                  "p",
+                  { className: "points-note" },
+                  React.createElement("span", { className: "pts" }, "+30"),
+                  " points for each vehicle parked correctly",
+                ),
+              ),
+              React.createElement(
+                "ul",
+                {
+                  className: "legend",
+                  "aria-label": "Which bay each vehicle uses",
+                },
+                LEGEND.map((i) =>
+                  React.createElement(
+                    "li",
+                    { key: i.kind },
+                    React.createElement("span", {
+                      className: "legend-dot k-" + i.kind,
+                      "aria-hidden": "true",
+                    }),
+                    React.createElement(
+                      "span",
+                      null,
+                      React.createElement("strong", null, i.label),
+                      " ",
+                      i.bay,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            React.createElement(
+              "div",
+              { className: "board-wrap", ref: H },
+              N > 0 &&
+                React.createElement(
+                  "div",
+                  { className: "board", style: { height: l.H * N } },
+                  React.createElement(
+                    "div",
+                    {
+                      className: "board-inner" + (n ? " dragging" : ""),
+                      ref: P,
+                      style: {
+                        width: l.W,
+                        height: l.H,
+                        transform: `scale(${N})`,
+                      },
+                    },
+                    W === "wide"
+                      ? React.createElement(SceneWide, { L: l })
+                      : React.createElement(SceneTall, { L: l }),
+                    n &&
+                      l.slots.map((i) => {
+                        const r = i.kind === R.kind && !O(i.id),
+                          c = A && A.id === i.id;
+                        return !r && !c
+                          ? null
+                          : React.createElement("div", {
+                              key: i.id,
+                              className:
+                                "slot-hint" +
+                                (c ? (q ? " over-ok" : " over-bad") : ""),
+                              style: {
+                                left: i.x - i.w / 2,
+                                top: i.y - i.h / 2,
+                                width: i.w,
+                                height: i.h,
+                              },
+                            });
+                      }),
+                    VEHICLES.map((i) => {
+                      const [r, c] = DIMS[i.kind],
+                        o = n && n.id === i.id,
+                        g = o ? n : T(i.id),
+                        p = x[i.id].t === "s";
+                      return React.createElement(
+                        "div",
+                        {
+                          key: i.id,
+                          className:
+                            "veh" +
+                            (o ? " lifted" : "") +
+                            (p ? " done" : " movable") +
+                            (F[i.id] ? " flash-" + F[i.id] : ""),
+                          style: {
+                            width: r,
+                            height: c,
+                            transform: `translate(${g.x - r / 2}px, ${g.y - c / 2}px) rotate(${g.rot}deg) scale(${o ? 1.1 : 1})`,
+                          },
+                          onPointerDown: (m) => Z(m, i),
+                          onPointerMove: K,
+                          onPointerUp: () => Q(!1),
+                          onPointerCancel: () => Q(!0),
+                          onLostPointerCapture: () => h.current && Q(!1),
+                          role: "img",
+                          "aria-label":
+                            i.name +
+                            (p
+                              ? ", parked correctly"
+                              : ", " + l.wrong[x[i.id].i].why),
+                        },
+                        React.createElement(VehicleArt, { v: i }),
+                      );
+                    }),
+                    VEHICLES.map((i) => {
+                      const r = x[i.id];
+                      if (r.t === "s") {
+                        const J = l.slots.find((ee) => ee.id === r.s);
+                        return React.createElement(
+                          "div",
+                          {
+                            key: "c" + i.id,
+                            className: "check",
+                            style: { left: J.x, top: J.y },
+                          },
+                          "\u2713",
+                        );
+                      }
+                      if (n && n.id === i.id) return null;
+                      const c = l.wrong[r.i],
+                        [o, g] = DIMS[i.kind],
+                        p = (c.r * Math.PI) / 180,
+                        m =
+                          (g / 2) * Math.abs(Math.cos(p)) +
+                          (o / 2) * Math.abs(Math.sin(p));
+                      if (!$)
+                        return React.createElement(
+                          "div",
+                          {
+                            key: "c" + i.id,
+                            className: "warn-dot",
+                            style: { left: c.x, top: c.y },
+                            "aria-hidden": "true",
+                          },
+                          "!",
+                        );
+                      const Y = c.y - m - 14,
+                        X = c.below || Y < 14 ? c.y + m + 14 : Y;
+                      return React.createElement(
+                        "div",
+                        {
+                          key: "c" + i.id,
+                          className: "why-chip",
+                          style: { left: clamp(c.x, 125, l.W - 125), top: X },
+                        },
+                        c.why,
+                      );
+                    }),
+                    React.createElement(Floats, { floats: z }),
+                  ),
+                ),
+            ),
+            React.createElement(
+              "p",
+              { className: "board-foot" },
+              "Tip: while you drag, the bays that fit that vehicle light up in green.",
+            ),
+          ),
+          React.createElement(Toast, { toast: L }),
+          s &&
+            React.createElement(
+              HowToPlay,
+              {
+                title: "Wrong Parking Challenge",
+                started: y,
+                steps: [
+                  "Drag each vehicle.",
+                  "Find its correct parking space.",
+                  "Correct parking earns 30 points.",
+                  "Select Submit to see your final score.",
+                ],
+                onStart: () => {
+                  (f(!1), k(!0));
+                },
+              },
+              React.createElement(
+                "div",
+                { className: "howto-legend" },
+                LEGEND.map((i) =>
+                  React.createElement(
+                    "div",
+                    { key: i.kind },
+                    React.createElement("span", {
+                      className: "legend-dot k-" + i.kind,
+                      "aria-hidden": "true",
+                    }),
+                    React.createElement("strong", null, i.label),
+                    React.createElement("span", null, i.bay),
+                  ),
+                ),
+              ),
+            ),
+          b &&
+            React.createElement(ResultModal, {
+              title: "Parking Challenge Complete! \u{1F697}",
+              score: M,
+              max: B,
+              lines: [
+                { value: u, label: "Correct Parking", tone: "ok" },
+                {
+                  value: VEHICLES.length - u,
+                  label: "Incorrect Parking",
+                  tone: "bad",
+                },
+              ],
+              formula: `Correct Parking: ${u} \xD7 30 = ${M} points`,
+              extra:
+                E.length > 0 &&
+                React.createElement(
+                  "div",
+                  { className: "missed" },
+                  React.createElement("strong", null, "Still to fix"),
+                  React.createElement(
+                    "span",
+                    null,
+                    E.map(
+                      (i) =>
+                        `${i.name}: ${l.wrong[x[i.id].i].why.toLowerCase()}`,
+                    ).join(". "),
+                    ".",
+                  ),
+                ),
+              message: _,
+              onAgain: U,
+              onBack: e,
+            }),
+        );
+      }
+      function newSortRound(e) {
+        const t = TOPICS.filter((s) => s.title !== e),
+          a = t[Math.floor(Math.random() * t.length)],
+          n = a.good.map(([s, f], y) => ({ id: "g" + y, e: s, n: f, ok: !0 })),
+          d = shuffle(a.bad)
+            .slice(0, 4)
+            .map(([s, f], y) => ({ id: "b" + y, e: s, n: f, ok: !1 })),
+          h = shuffle([...n, ...d]).map((s) => ({
+            ...s,
+            tilt: rand(-12, 12),
+            jx: Math.random(),
+            jy: Math.random(),
+          }));
+        return {
+          topic: a,
+          items: h,
+          cells: {
+            wide: shuffle(freeCells("wide")),
+            tall: shuffle(freeCells("tall")),
+          },
+          status: {},
+          sorted: [],
+          wrongDrops: 0,
+          key: Math.random(),
+        };
+      }
+      function freeCells(e) {
+        const t = SORT_LAYOUTS[e],
+          a = t.W / t.cols,
+          n = t.H / t.rows,
+          d = [];
+        for (let h = 0; h < t.rows; h++)
+          for (let s = 0; s < t.cols; s++) {
+            const f = (s + 0.5) * a,
+              y = (h + 0.5) * n;
+            (f > t.ex[0] && f < t.ex[1] && y > t.ex[2] && y < t.ex[3]) ||
+              d.push([s, h]);
+          }
+        return d;
+      }
+      function itemPos(e, t, a) {
+        const n = SORT_LAYOUTS[t],
+          d = e.items[a],
+          [h, s] = e.cells[t][a],
+          f = n.W / n.cols,
+          y = n.H / n.rows,
+          k = Math.max(0, f - n.size - 10) / 2,
+          b = Math.max(0, y - n.size - 10) / 2;
+        return {
+          x: (h + 0.5) * f + (d.jx * 2 - 1) * k,
+          y: (s + 0.5) * y + (d.jy * 2 - 1) * b,
+        };
+      }
+      function Pail({ S: e, color: t, label: a, count: n, total: d, part: h }) {
+        const s = e.bw,
+          f = e.bh,
+          y = 26;
+        if (h === "back")
+          return React.createElement(
+            "svg",
+            {
+              className: "pail-svg",
+              width: s,
+              height: f,
+              viewBox: `0 0 ${s} ${f}`,
+              "aria-hidden": "true",
+            },
+            React.createElement("path", {
+              d: `M ${s * 0.18} ${y} Q ${s / 2} ${-y * 1.6} ${s * 0.82} ${y}`,
+              fill: "none",
+              stroke: "#7e858c",
+              strokeWidth: "6",
+              strokeLinecap: "round",
+            }),
+            React.createElement("ellipse", {
+              cx: s / 2,
+              cy: y,
+              rx: s / 2 - 4,
+              ry: "18",
+              fill: "#1d2126",
+            }),
+          );
+        const k = s * 0.13,
+          b = s * 0.87;
+        return React.createElement(
+          "svg",
+          {
+            className: "pail-svg",
+            width: s,
+            height: f,
+            viewBox: `0 0 ${s} ${f}`,
+            "aria-hidden": "true",
+          },
+          React.createElement(
+            "defs",
+            null,
+            React.createElement(
+              "linearGradient",
+              { id: "pail-shade", x1: "0", x2: "1" },
+              React.createElement("stop", {
+                offset: "0",
+                stopColor: "#000",
+                stopOpacity: ".22",
+              }),
+              React.createElement("stop", {
+                offset: ".35",
+                stopColor: "#fff",
+                stopOpacity: ".12",
+              }),
+              React.createElement("stop", {
+                offset: ".7",
+                stopColor: "#000",
+                stopOpacity: "0",
+              }),
+              React.createElement("stop", {
+                offset: "1",
+                stopColor: "#000",
+                stopOpacity: ".28",
+              }),
+            ),
+          ),
+          React.createElement("ellipse", {
+            cx: s / 2,
+            cy: f - 6,
+            rx: s * 0.4,
+            ry: "8",
+            fill: "#000",
+            opacity: ".22",
+          }),
+          React.createElement("path", {
+            d: `M 4 ${y} L ${k} ${f - 12} Q ${s / 2} ${f} ${b} ${f - 12} L ${s - 4} ${y} Q ${s / 2} ${y + 22} 4 ${y} Z`,
+            fill: t,
+          }),
+          React.createElement("path", {
+            d: `M 4 ${y} L ${k} ${f - 12} Q ${s / 2} ${f} ${b} ${f - 12} L ${s - 4} ${y} Q ${s / 2} ${y + 22} 4 ${y} Z`,
+            fill: "url(#pail-shade)",
+          }),
+          React.createElement("path", {
+            d: `M 4 ${y} Q ${s / 2} ${y + 22} ${s - 4} ${y}`,
+            fill: "none",
+            stroke: "#fff",
+            strokeOpacity: ".5",
+            strokeWidth: "5",
+            strokeLinecap: "round",
+          }),
+          React.createElement("rect", {
+            x: s * 0.16,
+            y: f * 0.42,
+            width: s * 0.68,
+            height: f * 0.3,
+            rx: "10",
+            fill: "#fff",
+            opacity: ".95",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: s / 2,
+              y: f * 0.53,
+              textAnchor: "middle",
+              dominantBaseline: "middle",
+              fontSize: s * 0.075,
+              fontWeight: "800",
+              fill: "#1c2025",
+              fontFamily: "Overpass, sans-serif",
+            },
+            a,
+          ),
+          React.createElement(
+            "text",
+            {
+              x: s / 2,
+              y: f * 0.65,
+              textAnchor: "middle",
+              dominantBaseline: "middle",
+              fontSize: s * 0.07,
+              fontWeight: "700",
+              fill: t,
+              fontFamily: "Overpass, sans-serif",
+            },
+            n,
+            " / ",
+            d,
+          ),
+        );
+      }
+      function SortingGame({ onBack: e }) {
+        const [t, a] = useState(() => newSortRound()),
+          [n, d] = useState(null),
+          h = useRef(null),
+          [s, f] = useState(!0),
+          [y, k] = useState(!1),
+          [b, D] = useState(!1),
+          [F, S] = useState(""),
+          [L, C] = useToast(),
+          [z, v] = useFloats(),
+          [H, w] = useMeasure(),
+          P = useRef(null),
+          W = w && w < 640 ? "tall" : "wide",
+          l = SORT_LAYOUTS[W],
+          N = w ? w / l.W : 0,
+          { topic: $, items: x, status: I, sorted: u, wrongDrops: M } = t,
+          B = x.filter((i) => i.ok).length,
+          T = u.length * 20,
+          O = B * 20,
+          G = (i) => {
+            const r = P.current.getBoundingClientRect();
+            return { x: (i.clientX - r.left) / N, y: (i.clientY - r.top) / N };
+          },
+          j = (i, r) =>
+            Math.abs(i - l.bx) <= l.bw / 2 + 24 &&
+            r >= l.by - l.bh / 2 - 50 &&
+            r <= l.by + l.bh / 2 + 10,
+          Z = (i) => {
+            (S(""),
+              requestAnimationFrame(() => S(i)),
+              setTimeout(() => S(""), 600));
+          },
+          K = (i, r) => {
+            const c = x[r];
+            if (I[c.id] || b || s) return;
+            (i.preventDefault(),
+              i.currentTarget.setPointerCapture(i.pointerId));
+            const o = G(i),
+              g = itemPos(t, W, r),
+              p = {
+                id: c.id,
+                idx: r,
+                x: g.x,
+                y: g.y,
+                dx: o.x - g.x,
+                dy: o.y - g.y,
+                sx: g.x,
+                sy: g.y,
+              };
+            ((h.current = p), d(p));
+          },
+          Q = (i) => {
+            const r = h.current;
+            if (!r) return;
+            const c = G(i),
+              o = {
+                ...r,
+                x: clamp(c.x - r.dx, l.size / 2, l.W - l.size / 2),
+                y: clamp(c.y - r.dy, l.size / 2, l.H - l.size / 2),
+              };
+            ((h.current = o), d(o));
+          },
+          U = (i) => {
+            const r = h.current;
+            if (((h.current = null), !r)) {
+              d(null);
+              return;
+            }
+            if (i || Math.hypot(r.x - r.sx, r.y - r.sy) < 8 || !j(r.x, r.y)) {
+              d(null);
+              return;
+            }
+            const c = x[r.idx];
+            c.ok
+              ? (a((o) => ({
+                  ...o,
+                  status: { ...o.status, [c.id]: "in" },
+                  drop: { ...(o.drop || {}), [c.id]: { x: r.x, y: r.y } },
+                })),
+                d(null),
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => {
+                    a((o) => ({
+                      ...o,
+                      status: { ...o.status, [c.id]: "falling" },
+                    }));
+                  }),
+                ),
+                setTimeout(
+                  () =>
+                    a((o) =>
+                      o.status[c.id]
+                        ? {
+                            ...o,
+                            status: { ...o.status, [c.id]: "sorted" },
+                            sorted: o.sorted.includes(c.id)
+                              ? o.sorted
+                              : [...o.sorted, c.id],
+                          }
+                        : o,
+                    ),
+                  420,
+                ),
+                v(l.bx, l.by - l.bh / 2 - 34, "+20 Points", "ok"),
+                Z("gulp"),
+                u.length + 1 === B
+                  ? C(
+                      "win",
+                      "Every correct item is sorted",
+                      "Select Submit to see your final score",
+                    )
+                  : C(
+                      "ok",
+                      "Correct Item! +20",
+                      `${c.n} belongs in the ${$.bin.toLowerCase()}`,
+                    ))
+              : (d(null),
+                a((o) => ({
+                  ...o,
+                  wrongDrops: o.wrongDrops + 1,
+                  reject: c.id,
+                })),
+                setTimeout(
+                  () =>
+                    a((o) => (o.reject === c.id ? { ...o, reject: null } : o)),
+                  700,
+                ),
+                v(l.bx, l.by - l.bh / 2 - 34, "0 Points", "bad"),
+                Z("shake"),
+                C(
+                  "bad",
+                  "Wrong Item \u2014 Try Again",
+                  `${c.n} doesn't belong in the ${$.bin.toLowerCase()}`,
+                ));
+          },
+          R = () => {
+            (a((i) => newSortRound(i.topic.title)), D(!1));
+          },
+          A = n && j(n.x, n.y),
+          q = x.filter((i) => i.ok && !u.includes(i.id)),
+          E = T / O,
+          V =
+            E === 1
+              ? "Spotless! You identified every right item."
+              : E >= 0.7
+                ? "Nice work! You identified the right items and kept the area clean."
+                : E >= 0.4
+                  ? "Getting there. Read the challenge again and look for what the job really needs."
+                  : "Have another go. Think about what each item is for.",
+          _ = u.slice(-6).map((i) => x.find((r) => r.id === i));
+        return React.createElement(
+          "div",
+          { className: "game-page" },
+          React.createElement(GameHeader, {
+            title: "Pick Correct Road Symbol",
+            onBack: e,
+            onHelp: () => f(!0),
+            onSubmit: () => D(!0),
+            ready: u.length === B,
+            stats: [
+              {
+                label: "Items sorted",
+                value: `${u.length} / ${B}`,
+                tone: u.length ? "ok" : "",
+              },
+              { label: "Wrong drops", value: M, tone: M ? "bad" : "" },
+              { label: "Score", value: T },
+            ],
+          }),
+          React.createElement(
+            "main",
+            { className: "game-body" },
+            React.createElement(
+              "section",
+              { className: "game-intro sort-intro" },
+              React.createElement(
+                "div",
+                null,
+                React.createElement("h1", null, "Pick Correct Road Symbol"),
+                React.createElement(
+                  "p",
+                  { className: "challenge", key: $.title },
+                  React.createElement(
+                    "span",
+                    { className: "challenge-k" },
+                    "Today's Challenge",
+                  ),
+                  React.createElement(
+                    "span",
+                    { className: "challenge-t", style: { "--topic": $.color } },
+                    $.title,
+                  ),
+                ),
+                React.createElement(
+                  "p",
+                  { className: "lead" },
+                  "Pick the correct items and place them into the bucket. ",
+                  $.brief,
+                ),
+                React.createElement(
+                  "p",
+                  { className: "points-note" },
+                  React.createElement("span", { className: "pts" }, "+20"),
+                  " points for each correct item",
+                ),
+              ),
+              React.createElement(
+                "button",
+                { className: "btn-secondary small", onClick: R },
+                "New challenge",
+              ),
+            ),
+            React.createElement(
+              "div",
+              { className: "board-wrap", ref: H },
+              N > 0 &&
+                React.createElement(
+                  "div",
+                  { className: "board sort-board", style: { height: l.H * N } },
+                  React.createElement(
+                    "div",
+                    {
+                      className: "board-inner" + (n ? " dragging" : ""),
+                      ref: P,
+                      style: {
+                        width: l.W,
+                        height: l.H,
+                        transform: `scale(${N})`,
+                      },
+                    },
+                    React.createElement("div", { className: "sort-ground" }),
+                    React.createElement(
+                      "div",
+                      {
+                        className:
+                          "pail" + (A ? " over" : "") + (F ? " " + F : ""),
+                        style: {
+                          left: l.bx - l.bw / 2,
+                          top: l.by - l.bh / 2,
+                          width: l.bw,
+                          height: l.bh,
+                        },
+                      },
+                      React.createElement(Pail, { S: l, part: "back" }),
+                      React.createElement(
+                        "div",
+                        { className: "pile", style: { top: 2, width: l.bw } },
+                        _.map((i, r) =>
+                          React.createElement(
+                            "span",
+                            {
+                              key: i.id,
+                              style: {
+                                left: `${18 + r * 12}%`,
+                                transform: `rotate(${(r % 2 ? 1 : -1) * (8 + r * 3)}deg)`,
+                              },
+                            },
+                            i.e && i.e.startsWith("svg:") ? "\u{1F6A6}" : i.e,
+                          ),
+                        ),
+                      ),
+                      React.createElement(Pail, {
+                        S: l,
+                        part: "front",
+                        color: $.color,
+                        label: $.bin,
+                        count: u.length,
+                        total: B,
+                      }),
+                    ),
+                    A &&
+                      React.createElement(
+                        "div",
+                        {
+                          className: "drop-label",
+                          style: { left: l.bx, top: l.by - l.bh / 2 - 46 },
+                        },
+                        "Release to drop",
+                      ),
+                    x.map((i, r) => {
+                      const c = I[i.id];
+                      if (c === "sorted") return null;
+                      const o = n && n.id === i.id;
+                      let g = itemPos(t, W, r),
+                        p = i.tilt,
+                        m = 1,
+                        Y = 1;
+                      return (
+                        o && ((g = n), (p = 0), (m = 1.12)),
+                        c === "in" && ((g = t.drop[i.id]), (p = 0)),
+                        c === "falling" &&
+                          ((g = { x: l.bx, y: l.by - l.bh / 2 + 30 }),
+                          (p = 0),
+                          (m = 0.25),
+                          (Y = 0)),
+                        React.createElement(
+                          "div",
+                          {
+                            key: t.key + i.id,
+                            className:
+                              "item" +
+                              (o ? " lifted" : "") +
+                              (c ? " " + c : "") +
+                              (t.reject === i.id ? " rejected" : ""),
+                            style: {
+                              width: l.size,
+                              height: l.size,
+                              opacity: Y,
+                              transform: `translate(${g.x - l.size / 2}px, ${g.y - l.size / 2}px) rotate(${p}deg) scale(${m})`,
+                            },
+                            onPointerDown: (X) => K(X, r),
+                            onPointerMove: Q,
+                            onPointerUp: () => U(!1),
+                            onPointerCancel: () => U(!0),
+                            onLostPointerCapture: () => h.current && U(!1),
+                            role: "img",
+                            "aria-label": i.n,
+                          },
+                          React.createElement(ItemIcon, { e: i.e, size: l.size * 0.42 }),
+                          React.createElement(
+                            "span",
+                            {
+                              className: "item-n",
+                              style: {
+                                fontSize:
+                                  l.size * (W === "tall" ? 0.14 : 0.125),
+                              },
+                            },
+                            i.n,
+                          ),
+                        )
+                      );
+                    }),
+                    React.createElement(Floats, { floats: z }),
+                  ),
+                ),
+            ),
+            React.createElement(
+              "p",
+              { className: "board-foot" },
+              "Only the right items go in. Anything that doesn't belong bounces back to where it was.",
+            ),
+          ),
+          React.createElement(Toast, { toast: L }),
+          s &&
+            React.createElement(
+              HowToPlay,
+              {
+                title: "Pick Correct Road Symbol: " + $.title,
+                started: y,
+                steps: [
+                  "Pick up an item.",
+                  "Drag it into the bucket.",
+                  "Correct items earn 20 points.",
+                  "Select Submit to see your final score.",
+                ],
+                onStart: () => {
+                  (f(!1), k(!0));
+                },
+              },
+              React.createElement(
+                "p",
+                { className: "howto-note" },
+                React.createElement("strong", null, "Today's challenge:"),
+                " ",
+                $.brief,
+              ),
+            ),
+          b &&
+            React.createElement(ResultModal, {
+              title: "Road Symbol Challenge Complete! \u{1F6A6}",
+              score: T,
+              max: O,
+              lines: [
+                { value: u.length, label: "Correct Items", tone: "ok" },
+                {
+                  value: B - u.length,
+                  label: "Incorrect / Unsorted Items",
+                  tone: "bad",
+                },
+              ],
+              formula: `${u.length} \xD7 20 = ${T} points${M ? ` (wrong items tried: ${M})` : ""}`,
+              extra:
+                q.length > 0 &&
+                React.createElement(
+                  "div",
+                  { className: "missed" },
+                  React.createElement("strong", null, "Left behind"),
+                  React.createElement(
+                    "span",
+                    null,
+                    q.map((i) => i.e + " " + i.n).join(", "),
+                  ),
+                ),
+              message: V,
+              onAgain: R,
+              onBack: e,
+            }),
+        );
+      }
+      function ParkingIllo() {
+        return React.createElement(
+          "svg",
+          { viewBox: "0 0 320 150", className: "illo", "aria-hidden": "true" },
+          React.createElement("rect", {
+            width: "320",
+            height: "150",
+            rx: "10",
+            fill: "#33383f",
+          }),
+          React.createElement("rect", {
+            x: "0",
+            y: "104",
+            width: "320",
+            height: "46",
+            fill: "#3d434b",
+          }),
+          [40, 100, 160, 220, 280].map((e) =>
+            React.createElement("rect", {
+              key: e,
+              x: e,
+              y: "18",
+              width: "3",
+              height: "80",
+              fill: "#fff",
+              opacity: ".85",
+            }),
+          ),
+          React.createElement("rect", {
+            x: "0",
+            y: "122",
+            width: "320",
+            height: "3",
+            fill: "#f1c233",
+          }),
+          React.createElement(
+            "g",
+            { transform: "translate(58 26)" },
+            React.createElement(
+              "g",
+              { transform: "scale(.72)" },
+              React.createElement(VehicleArt, {
+                v: { kind: "car", color: "#2F62C9" },
+              }),
+            ),
+          ),
+          React.createElement(
+            "g",
+            { transform: "translate(234 26)" },
+            React.createElement(
+              "g",
+              { transform: "scale(.72)" },
+              React.createElement(VehicleArt, {
+                v: { kind: "ev", color: "#13A08A" },
+              }),
+            ),
+          ),
+          React.createElement(
+            "g",
+            { transform: "translate(150 70) rotate(28)" },
+            React.createElement(
+              "g",
+              { transform: "translate(-17 -32) scale(.72)" },
+              React.createElement(VehicleArt, {
+                v: { kind: "car", color: "#D4483C" },
+              }),
+            ),
+          ),
+          React.createElement("circle", {
+            cx: "150",
+            cy: "70",
+            r: "40",
+            fill: "none",
+            stroke: "#ff6b61",
+            strokeWidth: "3",
+            strokeDasharray: "7 6",
+          }),
+          React.createElement("path", {
+            d: "M196 60 Q214 36 196 18",
+            fill: "none",
+            stroke: "#fff",
+            strokeWidth: "3",
+            strokeLinecap: "round",
+          }),
+          React.createElement("path", {
+            d: "M190 22 L197 16 L202 25",
+            fill: "none",
+            stroke: "#fff",
+            strokeWidth: "3",
+            strokeLinecap: "round",
+            strokeLinejoin: "round",
+          }),
+        );
+      }
+      function SortIllo() {
+        return React.createElement(
+          "svg",
+          { viewBox: "0 0 320 150", className: "illo", "aria-hidden": "true" },
+          React.createElement("rect", {
+            width: "320",
+            height: "150",
+            rx: "10",
+            fill: "#1f5a3b",
+          }),
+          React.createElement("ellipse", {
+            cx: "160",
+            cy: "138",
+            rx: "58",
+            ry: "7",
+            fill: "#000",
+            opacity: ".25",
+          }),
+          React.createElement("path", {
+            d: "M118 52 Q160 18 202 52",
+            fill: "none",
+            stroke: "#9aa2a9",
+            strokeWidth: "4",
+          }),
+          React.createElement("path", {
+            d: "M112 54 L124 132 Q160 142 196 132 L208 54 Q160 66 112 54 Z",
+            fill: "#F1C233",
+          }),
+          React.createElement("ellipse", {
+            cx: "160",
+            cy: "54",
+            rx: "48",
+            ry: "9",
+            fill: "#1d2126",
+          }),
+          React.createElement("rect", {
+            x: "132",
+            y: "86",
+            width: "56",
+            height: "20",
+            rx: "5",
+            fill: "#fff",
+          }),
+          React.createElement(
+            "text",
+            {
+              x: "160",
+              y: "99",
+              textAnchor: "middle",
+              fontSize: "11",
+              fontWeight: "800",
+              fill: "#1c2025",
+              fontFamily: "Overpass, sans-serif",
+            },
+            "BIN",
+          ),
+          [
+            ["\u{1F964}", 40, 44, -12],
+            ["\u{1F4F0}", 66, 112, 10],
+            ["\u{1F96B}", 252, 40, 14],
+            ["\u{1F511}", 270, 108, -8],
+            ["\u{1F9C3}", 222, 128, 6],
+            ["\u{1F6A7}", 34, 128, 0],
+          ].map(([e, t, a, n]) =>
+            React.createElement(
+              "g",
+              { key: e, transform: `translate(${t} ${a}) rotate(${n})` },
+              React.createElement("rect", {
+                x: "-19",
+                y: "-19",
+                width: "38",
+                height: "38",
+                rx: "9",
+                fill: "#fff",
+                opacity: ".95",
+              }),
+              React.createElement(
+                "text",
+                {
+                  x: "0",
+                  y: "2",
+                  textAnchor: "middle",
+                  dominantBaseline: "middle",
+                  fontSize: "20",
+                },
+                e,
+              ),
+            ),
+          ),
+          React.createElement("path", {
+            d: "M92 46 Q118 22 140 40",
+            fill: "none",
+            stroke: "#fff",
+            strokeWidth: "3",
+            strokeLinecap: "round",
+            strokeDasharray: "2 7",
+          }),
+        );
+      }
+      function GameHome({ onPlay: e }) {
+        return React.createElement(
+          "main",
+          { className: "home" },
+          React.createElement(
+            "section",
+            { className: "hero" },
+            React.createElement(
+              "div",
+              { className: "brand" },
+              React.createElement(
+                "span",
+                { className: "brand-mark", "aria-hidden": "true" },
+                React.createElement(
+                  "svg",
+                  { viewBox: "0 0 32 32" },
+                  React.createElement("rect", {
+                    x: "2",
+                    y: "2",
+                    width: "28",
+                    height: "28",
+                    rx: "7",
+                    fill: "#F2B705",
+                  }),
+                  React.createElement("path", {
+                    d: "M12 26 L14.5 6 M20 26 L17.5 6",
+                    stroke: "#1C2025",
+                    strokeWidth: "2.6",
+                    strokeLinecap: "round",
+                  }),
+                  React.createElement("path", {
+                    d: "M16 8 V11 M16 15 V18 M16 22 V25",
+                    stroke: "#1C2025",
+                    strokeWidth: "2",
+                    strokeLinecap: "round",
+                  }),
+                ),
+              ),
+              "Road awareness training",
+            ),
+            React.createElement("h1", null, "Road Safety Challenge"),
+            React.createElement(
+              "p",
+              { className: "lede" },
+              "Test your awareness. Make the right decisions. Stay safe on the road.",
+            ),
+          ),
+          React.createElement(
+            "section",
+            { className: "roadway", "aria-label": "Choose a game" },
+            React.createElement("div", {
+              className: "lane-line",
+              "aria-hidden": "true",
+            }),
+            React.createElement(
+              "div",
+              { className: "signs" },
+              React.createElement(
+                "article",
+                { className: "sign sign-blue" },
+                React.createElement(
+                  "div",
+                  { className: "sign-face" },
+                  React.createElement(ParkingIllo, null),
+                  React.createElement(
+                    "div",
+                    { className: "sign-copy" },
+                    React.createElement("h2", null, "Wrong Parking Challenge"),
+                    React.createElement(
+                      "p",
+                      null,
+                      "Find the incorrectly parked vehicles and drag them into the correct parking positions.",
+                    ),
+                    React.createElement(
+                      "div",
+                      { className: "sign-meta" },
+                      React.createElement("span", null, "7 vehicles"),
+                      React.createElement("span", null, "30 points each"),
+                    ),
+                  ),
+                  React.createElement(
+                    "button",
+                    { className: "sign-btn", onClick: () => e("parking") },
+                    "Play Parking Game",
+                  ),
+                ),
+              ),
+              React.createElement(
+                "article",
+                { className: "sign sign-green" },
+                React.createElement(
+                  "div",
+                  { className: "sign-face" },
+                  React.createElement(SortIllo, null),
+                  React.createElement(
+                    "div",
+                    { className: "sign-copy" },
+                    React.createElement("h2", null, "Pick Correct Road Symbol"),
+                    React.createElement(
+                      "p",
+                      null,
+                      "Drag the correct road signs into the box. Watch out for fakes!",
+                    ),
+                    React.createElement(
+                      "div",
+                      { className: "sign-meta" },
+                      React.createElement(
+                        "span",
+                        null,
+                        "New topic every round",
+                      ),
+                      React.createElement("span", null, "20 points each"),
+                    ),
+                  ),
+                  React.createElement(
+                    "button",
+                    { className: "sign-btn", onClick: () => e("sorting") },
+                    "Play Sorting Game",
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }
+      function App() {
+        const [e, t] = useState("home"),
+          a = (n) => {
+            (t(n), window.scrollTo(0, 0));
+          };
+        return e === "parking"
+          ? React.createElement(ParkingGame, {
+              key: "parking",
+              onBack: () => a("home"),
+            })
+          : e === "sorting"
+            ? React.createElement(SortingGame, {
+                key: "sorting",
+                onBack: () => a("home"),
+              })
+            : React.createElement(GameHome, { onPlay: a });
+      }
+      ReactDOM.createRoot(document.getElementById("root")).render(
+        React.createElement(App, null),
+      );
+    </script>
+  </body>
+</html>
